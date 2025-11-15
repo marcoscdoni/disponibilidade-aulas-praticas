@@ -1,19 +1,26 @@
 // Configuration for n8n webhook integration
+// This file reads configuration from Vite environment variables.
+// Use a local `.env` file with variables prefixed by VITE_ (see .env.example).
+
+const webhookUrl = import.meta.env.VITE_N8N_WEBHOOK_URL || 'https://your-n8n-instance.com/webhook/survey'
+const apiKey = import.meta.env.VITE_N8N_API_KEY
+// Optional: allow customizing the header name used for the API key (defaults to x-api-key)
+const apiKeyHeader = import.meta.env.VITE_N8N_API_KEY_HEADER || 'x-api-key'
+
 export const config = {
-  // Replace this URL with your actual n8n webhook endpoint
-  n8nWebhookUrl: 'https://your-n8n-instance.com/webhook/survey',
-  
-  // Optional: Add authentication headers if needed
-  headers: {
-    'Content-Type': 'application/json',
-    // 'Authorization': 'Bearer your-token-here', // Uncomment if using authentication
-  },
-  
-  // Survey configuration
+  n8nWebhookUrl: webhookUrl,
+  headers: (() => {
+    const h = { 'Content-Type': 'application/json' }
+    if (apiKey) {
+      // attach the api key to the configured header name
+      h[apiKeyHeader] = apiKey
+    }
+    return h
+  })(),
   autoescola: {
-    name: 'AutoEscola Modelo', // Change this to your driving school name
-    showLogo: false, // Set to true if you want to add a logo
-    logoUrl: '/logo.png' // Path to your logo file
+    name: import.meta.env.VITE_AUTOESCOLA_NAME || 'AutoEscola Modelo',
+    showLogo: false,
+    logoUrl: '/logo.png'
   }
 }
 
@@ -25,22 +32,30 @@ export const submitToN8n = async (surveyData) => {
       autoescola: config.autoescola.name,
       ...surveyData
     }
-    
+
     console.log('Sending survey data to n8n:', payload)
-    
+
     const response = await fetch(config.n8nWebhookUrl, {
       method: 'POST',
       headers: config.headers,
       body: JSON.stringify(payload)
     })
-    
+
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`)
     }
-    
-    const result = await response.json()
+
+    // Try to parse JSON, but some webhooks may respond with empty body
+    let result = null
+    try {
+      result = await response.json()
+    } catch (err) {
+      // ignore parse errors
+      result = null
+    }
+
     console.log('n8n response:', result)
-    
+
     return { success: true, data: result }
   } catch (error) {
     console.error('Error submitting to n8n:', error)
