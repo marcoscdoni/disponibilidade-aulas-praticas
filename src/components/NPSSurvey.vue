@@ -94,7 +94,6 @@
 				<div class="text-6xl mb-6">🎉</div>
 				<h2 class="text-3xl font-bold text-gray-800 mb-4">Obrigado!</h2>
 				<p class="text-gray-600 text-lg mb-8 leading-relaxed">Sua pesquisa foi enviada com sucesso. Suas respostas são muito importantes para nós!</p>
-				<button @click="resetSurvey" class="btn-primary">Fazer Nova Pesquisa</button>
 			</div>
 
 			<div v-if="isSubmitting" class="card text-center"><div class="animate-spin w-16 h-16 border-4 border-green-500 border-t-transparent rounded-full mx-auto mb-6"></div><h2 class="text-2xl font-bold text-gray-800 mb-4">Enviando...</h2><p class="text-gray-600">Aguarde enquanto enviamos sua pesquisa.</p></div>
