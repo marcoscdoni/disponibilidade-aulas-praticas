@@ -11,13 +11,15 @@ const isProduction = process.env.NODE_ENV === 'production'
 const port = Number(process.env.PORT || 3000)
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
-const n8nSurveyUrl = process.env.N8N_SURVEY_URL || process.env.VITE_N8N_WEBHOOK_URL
-const n8nValidationUrl = process.env.N8N_VALIDATION_URL || process.env.VITE_N8N_VALIDATION_WEBHOOK_URL
-const n8nApiKey = process.env.N8N_API_KEY || process.env.VITE_N8N_API_KEY
-const n8nApiKeyHeader = process.env.N8N_API_KEY_HEADER || process.env.VITE_N8N_API_KEY_HEADER || 'x-api-key'
+// Prefer new NPS_* env names, fall back to legacy N8N_ and VITE_ names for compatibility
+// Use only the explicit NPS_* env variables (no legacy fallbacks in dev)
+const n8nSurveyUrl = process.env.NPS_SURVEY_WEBHOOK_URL
+const n8nValidationUrl = process.env.NPS_VALIDATION_WEBHOOK_URL
+const n8nApiKey = process.env.NPS_API_KEY
+const n8nApiKeyHeader = process.env.NPS_API_KEY_HEADER || 'x-api-key'
 
 if (!n8nSurveyUrl || !n8nValidationUrl) {
-  console.warn('Warning: N8N URLs are not fully configured. Set N8N_SURVEY_URL / N8N_VALIDATION_URL (or the legacy VITE_N8N_* equivalents).')
+  console.warn('Warning: NPS webhook URLs are not fully configured. Set NPS_SURVEY_WEBHOOK_URL / NPS_VALIDATION_WEBHOOK_URL in your .env')
 }
 
 const proxyHeaders = {
@@ -34,7 +36,7 @@ app.get('/api/validate-token', async (req, res) => {
   }
 
   if (!n8nValidationUrl) {
-    return res.status(500).json({ success: false, error: 'N8N_VALIDATION_URL ausente no servidor.' })
+    return res.status(500).json({ success: false, error: 'NPS_VALIDATION_WEBHOOK_URL ausente no servidor.' })
   }
 
   try {
@@ -56,7 +58,7 @@ app.get('/api/validate-token', async (req, res) => {
 
 app.post('/api/pesquisa', async (req, res) => {
   if (!n8nSurveyUrl) {
-    return res.status(500).json({ success: false, error: 'N8N_SURVEY_URL ausente no servidor.' })
+    return res.status(500).json({ success: false, error: 'NPS_SURVEY_WEBHOOK_URL ausente no servidor.' })
   }
 
   try {

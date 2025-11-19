@@ -4,7 +4,6 @@
 			<!-- Header -->
 			<div class="text-center mb-8 animate-fade-in">
 				<h1 class="text-4xl md:text-5xl font-bold text-white mb-2">Pesquisa de Satisfação</h1>
-				<p class="text-xl text-accent mb-4">{{ config.autoescola.name }}</p>
 				<p class="text-blue-100 opacity-90 leading-relaxed">Sua opinião é muito importante para nós! Este questionário leva apenas 3 minutos.</p>
 			</div>
 

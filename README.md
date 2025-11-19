@@ -25,44 +25,43 @@ cd nps-modelo
 npm install
 ```
 
-### 2. Configuração do n8n
+### 2. Configuração do backend integrado
 
-Edite o arquivo `src/config/n8n.js` para configurar sua integração:
+Este projeto junta o frontend e o backend em um único servidor Node.js. Configure o `.env` para que o servidor saiba para onde encaminhar `/api/pesquisa` e `/api/validate-token` no n8n, mantendo a chave API em segredo.
 
-```javascript
-export const config = {
-  // Substitua pela URL real do seu webhook n8n
-  n8nWebhookUrl: 'https://sua-instancia-n8n.com/webhook/survey',
-  
-  // Cabeçalhos opcionais (ex: autenticação)
-  headers: {
-    'Content-Type': 'application/json',
-    // 'Authorization': 'Bearer seu-token-aqui',
-  },
-  
-  // Configurações da autoescola
-  autoescola: {
-    name: 'Nome da Sua Autoescola', // Altere para o nome da sua autoescola
-    showLogo: false,
-    logoUrl: '/logo.png'
-  }
-}
+```bash
+NPS_SURVEY_WEBHOOK_URL=https://n8n.vempramodelo.com/webhook/nps-modelo/EnviarPesquisa
+NPS_VALIDATION_WEBHOOK_URL=https://n8n.vempramodelo.com/webhook/nps-modelo/GetDadosProcesso
+NPS_API_KEY=chave-secreta
+NPS_API_KEY_HEADER=x-api-key
 ```
+
+O frontend continuará chamando `/api/pesquisa` e `/api/validate-token`; o servidor cuidará de repassar as requisições para os webhooks do n8n com os cabeçalhos corretos.
+
+### Tokens
+
+- O token usado para abrir a pesquisa deve vir da URL (query string `?token=...` ou o último segmento). Isso garante que cada aluno use o token exclusivo recebido pela autoescola.
+- O fallback em `NPS_DEFAULT_TOKEN` existe apenas para testes manuais locais e deve ficar em branco em prod. Evite colocar um valor real aí em commits ou builds públicos.
+
+## ⚠️ Erros comuns
+
+- `NPS_VALIDATION_WEBHOOK_URL ausente no servidor`: significa que o `.env` está faltando `NPS_VALIDATION_WEBHOOK_URL`. Adicione esse valor para que o servidor saiba para qual webhook n8n encaminhar a validação.
+- `NPS_SURVEY_WEBHOOK_URL ausente no servidor`: informe a URL de envio (`/EnviarPesquisa`).
 
 ### 3. Executar o projeto
 
 ```bash
-# Modo de desenvolvimento
+# Modo de desenvolvimento (frontend + backend juntos)
 npm run dev
 
-# Build para produção
+# Gerar a build (usa Vite normalmente)
 npm run build
 
-# Preview da build de produção
-npm run preview
+# Executar o servidor integrado com a build gerada
+npm run start
 ```
 
-A aplicação estará disponível em `http://localhost:3000`
+A aplicação estará disponível em `http://localhost:3000` (ou na porta definida por `PORT`).
 
 ## 📊 Estrutura dos dados enviados para o n8n
 
@@ -136,19 +135,21 @@ src/
 
 ## 🌐 Integração com n8n
 
-Para configurar o webhook no n8n:
+O servidor Node integrado expõe `/api/pesquisa` e `/api/validate-token` e encaminha todas as requisições para os webhooks do n8n, adicionando o cabeçalho `x-api-key` apropriado e garantindo que o token e outros metadados sejam enviados no corpo da requisição.
 
-1. Crie um novo workflow no n8n
-2. Adicione um nó "Webhook" 
-3. Configure o método como "POST"
-4. Defina o caminho do webhook (ex: `/webhook/survey`)
-5. Use a URL gerada no arquivo de configuração
-6. Adicione nós para processar os dados recebidos (banco de dados, email, etc.)
+### Fluxo recomendado
 
-### Exemplo de workflow n8n:
 ```
-Webhook → JSON Parser → Database/Spreadsheet → Email Notification
+Frontend → Backend proxy protegido → Webhook n8n
 ```
+
+No n8n, o workflow pode ser o mesmo de antes:
+
+1. Webhook (POST) para `/webhook/survey`
+2. JSON Parser (opcional)
+3. Processamento (banco de dados, planilhas, notificações, etc.)
+
+O backend é responsável por traduzir o JSON recebido do frontend para o payload esperado pelo n8n e por repassar o `token` na carga útil para que o webhook possa marcar a pesquisa como enviada.
 
 ## 📋 TODO / Melhorias futuras
 
