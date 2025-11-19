@@ -6,14 +6,15 @@
 					<h1 class="text-4xl md:text-5xl font-bold text-white mb-2">Pesquisa de Satisfação</h1>
 					<p class="text-blue-100 opacity-90 leading-relaxed">Sua opinião é muito importante para nós! Este questionário leva apenas 3 minutos.</p>
 					<!-- token info / validation messages -->
-					<p v-if="tokenState.status === 'loading'" class="text-sm text-yellow-200 mt-2">Validando token...</p>
-					<p v-else-if="tokenState.status === 'ready' && tokenState.data && tokenState.data.tokenStatus === 'valid'" class="text-sm text-blue-200 mt-2">Respondendo pesquisa como: <strong>{{ tokenState.data.name }}</strong></p>
-					<p v-else-if="tokenState.status === 'ready' && tokenState.data && tokenState.data.tokenStatus !== 'valid'" class="text-sm text-red-300 mt-2">{{ tokenState.data.error || 'Token inválido ou expirado' }}</p>
-					<p v-else-if="tokenState.status === 'error'" class="text-sm text-red-300 mt-2">{{ tokenState.error || 'Erro ao validar token' }}</p>
+					<p v-if="tokenState.status === 'loading'" class="text-sm text-white mt-2 flex items-center justify-center gap-1"> 
+						<Spinner size="sm" color="white" />
+						<span>Carregando sua pesquisa</span>
+					</p>
+					<p v-else-if="tokenState.status === 'ready' && tokenState.data && tokenState.data.tokenStatus === 'valid'" class="text-sm text-white mt-2">Respondendo pesquisa como: <strong>{{ tokenState.data.name }}</strong></p>
 				</div>
 
 			<!-- Progress Bar -->
-			<div class="mb-8">
+			<div v-if="hasValidToken" class="mb-8">
 				<div class="flex justify-between items-center mb-2">
 					<span class="text-blue-100 text-sm">Progresso</span>
 					<span class="text-blue-100 text-sm">{{ currentStep }} de {{ totalSteps }}</span>
@@ -23,18 +24,70 @@
 
 			<!-- Welcome -->
 			<div v-if="currentStep === 0" class="card text-center animate-slide-in-right mb-5">
-					<div class="text-6xl mb-6">🎯</div>
-					<h2 class="text-3xl font-bold text-gray-800 mb-4">{{ welcomeTitle }}</h2>
-					<p class="text-gray-600 text-lg mb-6 leading-relaxed">Vamos começar nossa pesquisa de satisfação. Suas respostas nos ajudam a melhorar nossos serviços continuamente.</p>
-					<p class="text-sm text-red-500 mb-8">* Indica uma pergunta obrigatória</p>
+					<!-- Loading state while token is being validated -->
+					<div v-if="tokenState.status === 'loading'" class="py-10 px-6 text-white">
+						<div class="flex flex-col items-center gap-5">
+							<div class="p-4 rounded-full bg-white/15 shadow-lg shadow-black/30">
+								<Spinner size="lg" color="white" />
+							</div>
+							<div class="space-y-3 text-center max-w-xl mx-auto">
+								<h2 class="text-3xl font-bold">Estamos preparando sua avaliação</h2>
+								<p class="text-blue-100 text-base">Estamos confirmando suas credenciais e carregando o questionário personalizado para você. Isso costuma levar apenas alguns segundos.</p>
+							</div>
+						</div>
+					</div>
+				<!-- Default welcome content once token é válido -->
+				<div v-else>
+					<template v-if="tokenState.status === 'ready' && tokenState.data && tokenState.data.tokenStatus !== 'valid'">
+						<div class="py-10 px-6 text-white">
+							<div class="flex flex-col items-center text-center gap-4 max-w-xl mx-auto">
+								<div class="w-16 h-16 rounded-full bg-red-500/15 flex items-center justify-center text-red-200">
+									<svg class="w-9 h-9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+										<path d="M12 8v4" />
+										<path d="M12 16h.01" />
+										<path d="M10.29 3.86L1.82 18a1 1 0 00.86 1.5h18.64a1 1 0 00.86-1.5L12.71 3.86a1 1 0 00-1.72 0z" />
+									</svg>
+								</div>
+								<div class="space-y-2">
+									<p class="text-2xl font-semibold text-white">Não foi possível validar seu acesso</p>
+									<p class="text-base text-blue-100">{{ tokenState.data.error || 'Acesso inválido. Verifique o link de validação ou contate o suporte.' }}</p>
+								</div>
+							</div>
+						</div>
+					</template>
+					<template v-else-if="tokenState.status === 'error'">
+						<div class="py-10 px-6 text-white">
+							<div class="flex flex-col items-center text-center gap-4 max-w-xl mx-auto">
+								<div class="w-16 h-16 rounded-full bg-yellow-500/15 flex items-center justify-center text-yellow-200">
+									<svg class="w-9 h-9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+										<path d="M12 8v4" />
+										<path d="M12 16h.01" />
+										<path d="M10.29 3.86L1.82 18a1 1 0 00.86 1.5h18.64a1 1 0 00.86-1.5L12.71 3.86a1 1 0 00-1.72 0z" />
+									</svg>
+								</div>
+								<div class="space-y-2">
+									<p class="text-2xl font-semibold text-white">Não foi possível validar seu acesso</p>
+									<p class="text-base text-blue-100">{{ tokenState.error || 'Erro ao validar token. Tente novamente em instantes.' }}</p>
+								</div>
+							</div>
+						</div>
+					</template>
+					<template v-else>
+						<div class="text-6xl mb-6">🎯</div>
+						<h2 class="text-3xl font-bold text-gray-800 mb-4">{{ welcomeTitle }}</h2>
+						<p class="text-gray-600 text-lg mb-6 leading-relaxed">Vamos começar nossa pesquisa de satisfação. Suas respostas nos ajudam a melhorar nossos serviços continuamente.</p>
+						<p class="text-sm text-red-500 mb-8">* Indica uma pergunta obrigatória</p>
+					</template>
+				</div>
 					<!-- Button availability depends on token validation -->
-					<div v-if="tokenState.status === 'loading'" class="mb-4 text-sm text-gray-600">Validando token...</div>
-					<div v-else-if="tokenState.status === 'ready' && tokenState.data && tokenState.data.tokenStatus !== 'valid'" class="mb-4 text-sm text-red-500">{{ tokenState.data.error || 'Token inválido ou expirado' }}</div>
-					<button v-else @click="nextStep" class="btn-primary">Começar Pesquisa</button>
+				<div v-if="tokenState.status !== 'loading'" class="mt-6">
+						<!-- only show start button when token is valid (or idle for local dev) -->
+						<button v-if="isTokenValidForStart" @click="nextStep" class="btn-primary">Começar Pesquisa</button>
+					</div>
 				</div>
 
 			<!-- Question Steps -->
-					<transition name="question-transition" mode="out-in">
+					<transition v-if="hasValidToken" name="question-transition" mode="out-in">
 						<div v-if="currentStep > 0 && questions && currentStep <= questions.length" key="question" class="card animate-slide-in-right mb-5" ref="cardRef">
 					<div class="mb-6">
 						<div class="flex items-center justify-between mb-4">
@@ -123,12 +176,14 @@ import { ref, reactive, computed, watch, nextTick, onMounted } from 'vue'
 import LikertScale from './LikertScale.vue'
 import MultipleChoice from './MultipleChoice.vue'
 import NAButton from './NAButton.vue'
+import Spinner from './Spinner.vue'
+import Alert from './Alert.vue'
 import { submitToN8n, config, validateTokenWithBackend } from '../config/n8n.js'
 import logoSvg from '../assets/logo.svg'
 
 export default {
 	name: 'NPSSurvey',
-		components: { LikertScale, MultipleChoice, NAButton },
+		components: { LikertScale, MultipleChoice, NAButton, Spinner, Alert },
 	setup() {
 		const currentStep = ref(0)
 		// token state for validation flow
@@ -210,20 +265,18 @@ export default {
 		})
 
 		const welcomeTitle = computed(() => {
-			const name = tokenState.data?.nome_aluno || ''
+			const name = tokenState.data?.name || ''
 			if (!name) return 'Bem-vindo!'
 			const first = String(name).split(' ')[0] || name
-			return `Olá ${first.charAt(0).toUpperCase() + first.slice(1).toLowerCase()}`
+			return `Olá, ${first.charAt(0).toUpperCase() + first.slice(1).toLowerCase()}!`
 		})
 
-		const isTokenValidForStart = computed(() => {
-			if (tokenState.status === 'ready' && tokenState.data) {
-				return String(tokenState.data.tokenStatus || '').toLowerCase() === 'valid'
-			}
-			// if token not checked yet (idle) allow start for local/dev
-			if (tokenState.status === 'idle') return true
-			return false
+		const hasValidToken = computed(() => {
+			if (tokenState.status !== 'ready' || !tokenState.data) return false
+			return String(tokenState.data.tokenStatus || '').toLowerCase() === 'valid'
 		})
+
+		const isTokenValidForStart = computed(() => hasValidToken.value)
 
 		const getQuestionType = (type) => ({ nps: 'Escala 0-10', likert: 'Escala de satisfação', multiple: 'Múltipla escolha', text: 'Texto livre' }[type] || '')
 
@@ -328,7 +381,7 @@ export default {
 					Object.keys(naFlags).forEach(k => { naFlags[k] = false })
 				}
 
-				return { currentStep, questions, totalSteps, currentQuestion, progressPercentage, formData, isSubmitting, submitError, stepError, config, getQuestionType, setAnswer, onNAChange, naFlags, toggleNA, nextStep, previousStep, submitSurvey, retrySubmit, resetSurvey, logoSvg, tokenState, welcomeTitle }
+				return { currentStep, questions, totalSteps, currentQuestion, progressPercentage, formData, isSubmitting, submitError, stepError, config, getQuestionType, setAnswer, onNAChange, naFlags, toggleNA, nextStep, previousStep, submitSurvey, retrySubmit, resetSurvey, logoSvg, tokenState, welcomeTitle, isTokenValidForStart, hasValidToken }
 	}
 }
 </script>
