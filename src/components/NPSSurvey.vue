@@ -158,7 +158,7 @@
 			<!-- Thank you / loading / error screens -->
 			<div v-if="currentStep > questions.length && !isSubmitting" class="card text-center animate-slide-in-right mb-5">
 				<div class="text-6xl mb-6">🎉</div>
-				<h2 class="text-3xl font-bold text-gray-800 mb-4">Obrigado!</h2>
+				<h2 class="text-3xl font-bold text-gray-800 mb-4">{{ thankYouTitle }}</h2>
 				<p class="text-gray-600 text-lg mb-8 leading-relaxed">Sua pesquisa foi enviada com sucesso. Suas respostas são muito importantes para nós!</p>
 			</div>
 
@@ -331,6 +331,13 @@ export default {
 			return `Olá, ${first.charAt(0).toUpperCase() + first.slice(1).toLowerCase()}!`
 		})
 
+		const thankYouTitle = computed(() => {
+			const name = tokenState.data?.name || ''
+			if (!name) return 'Obrigado!'
+			const first = String(name).split(' ')[0] || name
+			return `Obrigado, ${first.charAt(0).toUpperCase() + first.slice(1).toLowerCase()}!`
+		})
+
 		const hasValidToken = computed(() => {
 			if (tokenState.status !== 'ready' || !tokenState.data) return false
 			return String(tokenState.data.tokenStatus || '').toLowerCase() === 'valid'
@@ -468,7 +475,7 @@ export default {
 					clearProgress()
 				}
 
-				return { currentStep, questions, totalSteps, currentQuestion, progressPercentage, formData, isSubmitting, submitError, stepError, config, getQuestionType, setAnswer, onNAChange, naFlags, toggleNA, nextStep, previousStep, submitSurvey, retrySubmit, resetSurvey, logoSvg, tokenState, welcomeTitle, isTokenValidForStart, hasValidToken }
+				return { currentStep, questions, totalSteps, currentQuestion, progressPercentage, formData, isSubmitting, submitError, stepError, config, getQuestionType, setAnswer, onNAChange, naFlags, toggleNA, nextStep, previousStep, submitSurvey, retrySubmit, resetSurvey, logoSvg, tokenState, welcomeTitle, thankYouTitle, isTokenValidForStart, hasValidToken }
 	}
 }
 </script>
