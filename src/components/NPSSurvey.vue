@@ -5,6 +5,7 @@
 			<div class="text-center mb-8 animate-fade-in">
 				<h1 class="text-4xl md:text-5xl font-bold text-white mb-2">Pesquisa de Satisfação</h1>
 				<p class="text-blue-100 opacity-90 leading-relaxed">Sua opinião é muito importante para nós! Este questionário leva apenas 3 minutos.</p>
+				<p v-if="tokenState.status === 'ready' && tokenState.data" class="text-sm text-blue-200 mt-2">Respondendo pesquisa como: <strong>{{ tokenState.data.nome_aluno }}</strong></p>
 			</div>
 
 			<!-- Progress Bar -->
@@ -18,8 +19,8 @@
 
 			<!-- Welcome -->
 			<div v-if="currentStep === 0" class="card text-center animate-slide-in-right mb-5">
-				<div class="text-6xl mb-6">🎯</div>
-				<h2 class="text-3xl font-bold text-gray-800 mb-4">Bem-vindo!</h2>
+					<div class="text-6xl mb-6">🎯</div>
+					<h2 class="text-3xl font-bold text-gray-800 mb-4">{{ welcomeTitle }}</h2>
 				<p class="text-gray-600 text-lg mb-6 leading-relaxed">Vamos começar nossa pesquisa de satisfação. Suas respostas nos ajudam a melhorar nossos serviços continuamente.</p>
 				<p class="text-sm text-red-500 mb-8">* Indica uma pergunta obrigatória</p>
 				<button @click="nextStep" class="btn-primary">Começar Pesquisa</button>
@@ -111,11 +112,11 @@
 </template>
 
 <script>
-import { ref, reactive, computed, watch, nextTick } from 'vue'
+import { ref, reactive, computed, watch, nextTick, onMounted } from 'vue'
 import LikertScale from './LikertScale.vue'
 import MultipleChoice from './MultipleChoice.vue'
 import NAButton from './NAButton.vue'
-import { submitToN8n, config } from '../config/n8n.js'
+import { submitToN8n, config, validateTokenWithBackend } from '../config/n8n.js'
 import logoSvg from '../assets/logo.svg'
 
 export default {
@@ -123,6 +124,8 @@ export default {
 		components: { LikertScale, MultipleChoice, NAButton },
 	setup() {
 		const currentStep = ref(0)
+		// token state for validation flow
+		const tokenState = reactive({ status: 'idle', token: null, data: null, error: '' })
 		const isSubmitting = ref(false)
 		const submitError = ref('')
 		const stepError = ref('')
@@ -165,6 +168,46 @@ export default {
 		const totalSteps = questions.length
 		const currentQuestion = computed(() => (currentStep.value > 0 && currentStep.value <= questions.length) ? questions[currentStep.value - 1] : null)
 		const progressPercentage = computed(() => Math.round((currentStep.value / (totalSteps + 1)) * 100))
+
+		const extractTokenFromUrl = () => {
+			const fallbackToken = (import.meta.env.NPS_DEFAULT_TOKEN || '').trim() || null
+			if (typeof window === 'undefined') return fallbackToken
+			const currentUrl = new URL(window.location.href)
+			const queryToken = currentUrl.searchParams.get('token')
+			if (queryToken) return queryToken
+			const parts = (currentUrl.pathname || '').split('/').filter(Boolean)
+			return parts.length ? parts[parts.length - 1] : fallbackToken
+		}
+
+		onMounted(async () => {
+			const token = extractTokenFromUrl()
+			if (!token) return
+			tokenState.status = 'loading'
+			tokenState.token = token
+			try {
+				const result = await validateTokenWithBackend(token)
+				if (result.success) {
+					// backend may return an array or object
+					const student = Array.isArray(result.data) ? result.data[0] : result.data
+					tokenState.data = student || null
+					tokenState.status = student ? 'ready' : 'error'
+					if (!student) tokenState.error = 'Dados do aluno não retornados.'
+				} else {
+					tokenState.status = 'error'
+					tokenState.error = result.error || 'Token inválido'
+				}
+			} catch (err) {
+				tokenState.status = 'error'
+				tokenState.error = err.message || String(err)
+			}
+		})
+
+		const welcomeTitle = computed(() => {
+			const name = tokenState.data?.nome_aluno || ''
+			if (!name) return 'Bem-vindo!'
+			const first = String(name).split(' ')[0] || name
+			return `Olá ${first.charAt(0).toUpperCase() + first.slice(1).toLowerCase()}`
+		})
 
 		const getQuestionType = (type) => ({ nps: 'Escala 0-10', likert: 'Escala de satisfação', multiple: 'Múltipla escolha', text: 'Texto livre' }[type] || '')
 
