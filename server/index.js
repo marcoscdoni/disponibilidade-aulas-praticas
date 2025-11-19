@@ -1,15 +1,15 @@
-import express from 'express'
-import dotenv from 'dotenv'
-import path from 'path'
-import { fileURLToPath } from 'url'
-import { createServer as createViteServer } from 'vite'
+// CommonJS version for better server compatibility
+const express = require('express')
+const dotenv = require('dotenv')
+const path = require('path')
 
+// Load environment variables
 dotenv.config()
 
 const app = express()
 const isProduction = process.env.NODE_ENV === 'production'
 const port = Number(process.env.PORT || 3000)
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const __dirname = path.dirname(__filename)
 
 // Prefer new NPS_* env names, fall back to legacy N8N_ and VITE_ names for compatibility
 // Use only the explicit NPS_* env variables (no legacy fallbacks in dev)
@@ -107,14 +107,24 @@ app.post('/api/pesquisa', async (req, res) => {
 
 const startServer = async () => {
   if (!isProduction) {
-    const vite = await createViteServer({
-      root: process.cwd(),
-      server: {
-        middlewareMode: true
-      }
-    })
-    app.use(vite.middlewares)
+    // Development mode - use dynamic import for Vite
+    try {
+      const { createServer: createViteServer } = await import('vite')
+      const vite = await createViteServer({
+        root: process.cwd(),
+        server: {
+          middlewareMode: true
+        }
+      })
+      app.use(vite.middlewares)
+    } catch (error) {
+      console.error('Failed to load Vite:', error)
+      console.log('Running in static file mode...')
+      // Fallback to static files if Vite fails
+      app.use(express.static(path.join(__dirname, '../dist')))
+    }
   } else {
+    // Production mode - serve static files
     const distPath = path.join(__dirname, '../dist')
     app.use(express.static(distPath))
     // Fallback para SPA - todas as rotas não encontradas servem o index.html
@@ -128,4 +138,4 @@ const startServer = async () => {
   })
 }
 
-startServer()
+startServer().catch(console.error)

@@ -1,7 +1,6 @@
 {
   "name": "nps-modelo",
   "version": "1.0.0",
-  "type": "module",
   "scripts": {
     "dev": "cross-env NODE_ENV=development nodemon --watch server --watch src --ext js,vue,css --exec \"node server/index.js\"",
     "build": "vite build",
