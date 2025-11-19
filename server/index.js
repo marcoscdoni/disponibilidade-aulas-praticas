@@ -9,7 +9,7 @@ dotenv.config()
 const app = express()
 const isProduction = process.env.NODE_ENV === 'production'
 const port = Number(process.env.PORT || 3000)
-const __dirname = path.dirname(__filename)
+// __dirname is available by default in CommonJS
 
 // Prefer new NPS_* env names, fall back to legacy N8N_ and VITE_ names for compatibility
 // Use only the explicit NPS_* env variables (no legacy fallbacks in dev)
