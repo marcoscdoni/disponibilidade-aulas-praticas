@@ -56,18 +56,33 @@ export const getInitialNAFlags = () => {
 /**
  * Check if a question should be displayed based on conditions
  * @param {Object} question - Question configuration
- * @param {Object} formData - Current form data
- * @param {Object} naFlags - Current NA flags
+ * @param {Object} tokenData - Token/student data (includes category)
  * @returns {boolean} Whether the question should be shown
  */
-export const shouldShowQuestion = (question, formData, naFlags) => {
+export const shouldShowQuestion = (question, tokenData = null) => {
   // If question has no conditions, always show
   if (!question.conditional) {
     return true
   }
   
-  // Add custom conditional logic here if needed
-  // For now, all conditional questions are shown
+  // Check showIf conditions
+  if (question.showIf) {
+    // Check student category condition
+    if (question.showIf.studentCategory && tokenData) {
+      const studentCategory = tokenData.category || tokenData.studentCategory || ''
+      const allowedCategories = question.showIf.studentCategory
+      
+      // If student has a category, check if it matches allowed categories
+      if (studentCategory) {
+        return allowedCategories.includes(studentCategory.toUpperCase())
+      }
+      
+      // If no category info, show the question (fail-safe)
+      return true
+    }
+  }
+  
+  // Default: show conditional questions
   return true
 }
 

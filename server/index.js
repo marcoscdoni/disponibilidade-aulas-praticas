@@ -62,16 +62,29 @@ app.post('/api/pesquisa', async (req, res) => {
   }
 
   try {
+    // Captura o IP do cliente
+    const clientIp = req.headers['x-forwarded-for']?.split(',')[0].trim() || 
+                     req.headers['x-real-ip'] || 
+                     req.socket.remoteAddress || 
+                     req.ip || 
+                     null
+
+    // Adiciona o IP ao payload
+    const payloadWithIp = {
+      ...req.body,
+      ip_acesso: clientIp
+    }
+
     // Log the incoming payload for debugging (dev only)
     try {
-      console.log('proxy /api/pesquisa - forwarding payload:', JSON.stringify(req.body))
+      console.log('proxy /api/pesquisa - forwarding payload:', JSON.stringify(payloadWithIp))
     } catch (e) {
       console.log('proxy /api/pesquisa - forwarding payload: [unserializable]')
     }
     const response = await fetch(n8nSurveyUrl, {
       method: 'POST',
       headers: proxyHeaders,
-      body: JSON.stringify(req.body)
+      body: JSON.stringify(payloadWithIp)
     })
     const text = await response.text()
     // Log proxied response for debugging (dev only)

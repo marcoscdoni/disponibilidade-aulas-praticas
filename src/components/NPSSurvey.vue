@@ -54,9 +54,9 @@
 									</svg>
 								</div>
 								<div class="space-y-3 text-center">
-									<h2 class="text-2xl font-bold text-white">Link inválido</h2>
-									<p class="text-base text-blue-100">{{ tokenState.data.error || 'Acesso inválido. Verifique o link de validação ou contate o suporte.' }}</p>
-									<p class="text-sm text-blue-200">Se precisar, solicite um novo link ao suporte da autoescola.</p>
+									<h2 class="text-2xl font-bold text-white">{{ isTokenUsed ? 'Pesquisa já respondida' : 'Link inválido' }}</h2>
+									<p class="text-base text-blue-100">{{ tokenErrorMessage }}</p>
+									<p v-if="!isTokenUsed" class="text-sm text-blue-200">Se precisar, solicite um novo link ao suporte da autoescola.</p>
 								</div>
 							</div>
 						</div>
@@ -120,15 +120,7 @@
 						</div>
 
 												<div v-else-if="currentQuestion.type === 'likert'">
-																									<div v-if="currentQuestion.naOption?.enabled" class="mb-4">
-																										<!-- nicer NA button component -->
-																										<NAButton v-model="naFlags[currentQuestion.key]" :label="currentQuestion.naOption.label" size="xl" />
-																									</div>
-
-													<div v-if="!naFlags[currentQuestion.key]">
-														<LikertScale :model-value="formData[currentQuestion.key]" @update:model-value="setAnswer($event)" />
-													</div>
-													<div v-else class="text-sm text-gray-500 italic">Pulando esta pergunta porque você indicou que não fez aulas.</div>
+													<LikertScale :model-value="formData[currentQuestion.key]" @update:model-value="setAnswer($event)" />
 												</div>
 
 						<MultipleChoice v-else-if="currentQuestion.type === 'multiple'" :model-value="formData[currentQuestion.key]" :options="currentQuestion.options" @update:model-value="setAnswer($event)" />
@@ -182,7 +174,7 @@ import NAButton from './NAButton.vue'
 import Spinner from './Spinner.vue'
 import Alert from './Alert.vue'
 import { submitToN8n, config, validateTokenWithBackend } from '../config/n8n.js'
-import { loadQuestions, getInitialFormData, getInitialNAFlags, getQuestionTypeLabel, validateQuestion as validateQuestionHelper } from '../config/questionsHelper.js'
+import { loadQuestions, getInitialFormData, getInitialNAFlags, getQuestionTypeLabel, validateQuestion as validateQuestionHelper, shouldShowQuestion } from '../config/questionsHelper.js'
 import logoSvg from '../assets/logo.svg'
 
 export default {
@@ -198,17 +190,27 @@ export default {
 
 		// Load questions from JSON configuration
 		const questionsConfig = loadQuestions()
-		const questions = questionsConfig.questions
+		const allQuestions = questionsConfig.questions
+		
+		// Filter questions based on student category
+		const questions = computed(() => {
+			return allQuestions.filter(q => shouldShowQuestion(q, tokenState.data))
+		})
 		
 		// Initialize form data dynamically from questions
 		const formData = reactive(getInitialFormData())
 		
-		// Initialize NA flags dynamically
+		// Initialize NA flags dynamically (kept for backward compatibility)
 		const naFlags = reactive(getInitialNAFlags())
 
-		const totalSteps = questions.length
-		const currentQuestion = computed(() => (currentStep.value > 0 && currentStep.value <= questions.length) ? questions[currentStep.value - 1] : null)
-		const progressPercentage = computed(() => Math.round((currentStep.value / (totalSteps + 1)) * 100))
+		const totalSteps = computed(() => questions.value.length)
+		const currentQuestion = computed(() => {
+			if (currentStep.value > 0 && currentStep.value <= questions.value.length) {
+				return questions.value[currentStep.value - 1]
+			}
+			return null
+		})
+		const progressPercentage = computed(() => Math.round((currentStep.value / (totalSteps.value + 1)) * 100))
 
 		const extractTokenFromUrl = () => {
 			const fallbackToken = (import.meta.env.NPS_DEFAULT_TOKEN || '').trim() || null
@@ -324,6 +326,36 @@ export default {
 			}
 		})
 
+		const isTokenUsed = computed(() => {
+			if (!tokenState.data) return false
+			return tokenState.data.tokenUsedAt != null
+		})
+
+		const tokenErrorMessage = computed(() => {
+			if (isTokenUsed.value) {
+				const usedDate = tokenState.data?.tokenUsedAt
+				if (usedDate) {
+					try {
+						// Remove o Z do final para tratar como horário local (já vem em BRT do backend)
+						const dateString = String(usedDate).replace('Z', '')
+						const date = new Date(dateString)
+						const formattedDate = date.toLocaleString('pt-BR', {
+							day: '2-digit',
+							month: '2-digit',
+							year: 'numeric',
+							hour: '2-digit',
+							minute: '2-digit'
+						})
+						return `Essa pesquisa já foi respondida em ${formattedDate}`
+					} catch (e) {
+						return 'Essa pesquisa já foi respondida anteriormente'
+					}
+				}
+				return 'Essa pesquisa já foi respondida anteriormente'
+			}
+			return tokenState.error || 'Token inativo'
+		})
+
 		const welcomeTitle = computed(() => {
 			const name = tokenState.data?.name || ''
 			if (!name) return 'Bem-vindo!'
@@ -421,9 +453,9 @@ export default {
 
 			const nextStep = async () => {
 				if (currentStep.value === 0) { currentStep.value++; scrollToCard(); return }
-				if (currentStep.value <= questions.length) {
+				if (currentStep.value <= questions.value.length) {
 					if (!validateCurrentStep()) return
-					if (currentStep.value === questions.length) {
+					if (currentStep.value === questions.value.length) {
 						await submitSurvey()
 					} else {
 						currentStep.value++
@@ -465,7 +497,7 @@ export default {
 			finally { isSubmitting.value = false }
 		}
 
-				const retrySubmit = () => { submitError.value = ''; currentStep.value = questions.length }
+				const retrySubmit = () => { submitError.value = ''; currentStep.value = questions.value.length }
 				const resetSurvey = () => {
 					currentStep.value = 0; isSubmitting.value = false; submitError.value = ''; stepError.value = '';
 					Object.keys(formData).forEach(key => { if (Array.isArray(formData[key])) formData[key] = [] ; else formData[key] = key === 'npsScore' ? null : '' })
@@ -475,7 +507,7 @@ export default {
 					clearProgress()
 				}
 
-				return { currentStep, questions, totalSteps, currentQuestion, progressPercentage, formData, isSubmitting, submitError, stepError, config, getQuestionType, setAnswer, onNAChange, naFlags, toggleNA, nextStep, previousStep, submitSurvey, retrySubmit, resetSurvey, logoSvg, tokenState, welcomeTitle, thankYouTitle, isTokenValidForStart, hasValidToken }
+				return { currentStep, questions, totalSteps, currentQuestion, progressPercentage, formData, isSubmitting, submitError, stepError, config, getQuestionType, setAnswer, onNAChange, naFlags, toggleNA, nextStep, previousStep, submitSurvey, retrySubmit, resetSurvey, logoSvg, tokenState, welcomeTitle, thankYouTitle, isTokenValidForStart, hasValidToken, isTokenUsed, tokenErrorMessage }
 	}
 }
 </script>

@@ -43,56 +43,48 @@
       "key": "practicalCarClasses",
       "question": "Como você avalia a qualidade das aulas práticas de carro?",
       "type": "likert",
-      "required": false,
+      "required": true,
       "order": 5,
-      "description": "Marque \"Não fiz aula de carro\" se não participou de aulas de carro.",
       "category": "car",
       "conditional": true,
-      "naOption": {
-        "enabled": true,
-        "label": "Não fiz essa categoria"
+      "showIf": {
+        "studentCategory": ["B", "AB"]
       }
     },
     {
       "key": "practicalMotoClasses",
       "question": "Como você avalia a qualidade das aulas práticas de moto?",
       "type": "likert",
-      "required": false,
+      "required": true,
       "order": 6,
-      "description": "Marque \"Não fiz aula de moto\" se não participou de aulas de moto.",
       "category": "moto",
       "conditional": true,
-      "naOption": {
-        "enabled": true,
-        "label": "Não fiz essa categoria"
+      "showIf": {
+        "studentCategory": ["A", "AB"]
       }
     },
     {
       "key": "practicalInstructorCar",
       "question": "Como você avalia o instrutor nas aulas práticas de carro?",
       "type": "likert",
-      "required": false,
+      "required": true,
       "order": 7,
-      "description": "Marque \"Não fiz aula de carro\" se não participou de aulas de carro.",
       "category": "car",
       "conditional": true,
-      "naOption": {
-        "enabled": true,
-        "label": "Não fiz essa categoria"
+      "showIf": {
+        "studentCategory": ["B", "AB"]
       }
     },
     {
       "key": "practicalInstructorMoto",
       "question": "Como você avalia o instrutor nas aulas práticas de moto?",
       "type": "likert",
-      "required": false,
+      "required": true,
       "order": 8,
-      "description": "Marque \"Não fiz aula de moto\" se não participou de aulas de moto.",
       "category": "moto",
       "conditional": true,
-      "naOption": {
-        "enabled": true,
-        "label": "Não fiz essa categoria"
+      "showIf": {
+        "studentCategory": ["A", "AB"]
       }
     },
     {
