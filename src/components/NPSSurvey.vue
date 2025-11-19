@@ -134,7 +134,7 @@
 						<MultipleChoice v-else-if="currentQuestion.type === 'multiple'" :model-value="formData[currentQuestion.key]" :options="currentQuestion.options" @update:model-value="setAnswer($event)" />
 
 						<div v-else-if="currentQuestion.type === 'text'">
-							<textarea :value="formData[currentQuestion.key]" @input="setAnswer($event.target.value)" class="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition-all duration-300 resize-none" rows="6" :placeholder="currentQuestion.placeholder || 'Escreva sua resposta aqui...'"></textarea>
+							<textarea :value="formData[currentQuestion.key]" @input="setAnswer($event.target.value)" class="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition-all duration-300 resize-none text-gray-800" rows="6" :placeholder="currentQuestion.placeholder || 'Escreva sua resposta aqui...'"></textarea>
 						</div>
 					</div>
 
@@ -144,11 +144,11 @@
 								</div>
 
 					<div class="flex justify-between items-center">
-						<button v-if="currentStep > 1" @click="previousStep" class="btn-secondary flex items-center gap-2">
+						<button v-if="currentStep > 1" @click="previousStep" :disabled="isSubmitting" class="btn-secondary flex items-center gap-2">
 							<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg> Voltar
 						</button>
 						<div v-else></div>
-						<button @click="nextStep" class="btn-primary flex items-center gap-2">{{ currentStep === questions.length ? 'Finalizar' : 'Próxima' }}
+						<button @click="nextStep" :disabled="isSubmitting" class="btn-primary flex items-center gap-2">{{ currentStep === questions.length ? 'Finalizar' : 'Próxima' }}
 							<svg v-if="currentStep < questions.length" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
 						</button>
 					</div>
@@ -222,8 +222,8 @@ export default {
 			{ key: 'practicalInstructorMoto', question: 'Como você avalia o instrutor nas aulas práticas de moto?', type: 'likert', required: false, description: 'Marque "Não fiz aula de moto" se não participou de aulas de moto.' },
 			{ key: 'vehicleConditions', question: 'Como você avalia as condições dos veículos utilizados nas aulas práticas?', type: 'likert', required: true },
 			{ key: 'infrastructure', question: 'Como você avalia a infraestrutura da autoescola (salas, banheiros, recepção)?', type: 'likert', required: true },
-			{ key: 'dislikes', question: 'O que você NÃO gostou?', description: 'Marque todas as opções que se aplicam', type: 'multiple', required: false, options: [ 'Atendimento da recepção','Demora no retorno de mensagens/ligações','Falta de comunicação sobre prazos','Prazo para início do curso teórico','Prazo para início das aulas práticas','Disponibilidade de horários para aulas práticas','Demora no agendamento das provas','Cancelamento de aulas sem aviso','Didática do instrutor teórico','Didática do instrutor prático','Material didático desatualizado','Condições dos veículos','Limpeza e conforto das instalações','Dificuldade para agendar aulas','Falta de suporte durante o processo','Tempo total do processo muito longo','Outro (especificar nos comentários)' ] },
 			{ key: 'likes', question: 'O que você MAIS gostou?', description: 'Marque todas as opções que se aplicam', type: 'multiple', required: false, options: [ 'Atendimento da equipe','Comunicação clara e transparente','Rapidez no início das aulas','Flexibilidade de horários','Qualidade das aulas teóricas','Qualidade das aulas práticas','Profissionalismo dos instrutores','Estado dos veículos','Infraestrutura moderna e limpa','Facilidade no agendamento','Suporte durante todo o processo','Preço justo','Localização conveniente','Outro (especificar nos comentários)' ] },
+			{ key: 'dislikes', question: 'O que você NÃO gostou?', description: 'Marque todas as opções que se aplicam', type: 'multiple', required: false, options: [ 'Atendimento da recepção','Demora no retorno de mensagens/ligações','Falta de comunicação sobre prazos','Prazo para início do curso teórico','Prazo para início das aulas práticas','Disponibilidade de horários para aulas práticas','Demora no agendamento das provas','Cancelamento de aulas sem aviso','Didática do instrutor teórico','Didática do instrutor prático','Material didático desatualizado','Condições dos veículos','Limpeza e conforto das instalações','Dificuldade para agendar aulas','Falta de suporte durante o processo','Tempo total do processo muito longo','Outro (especificar nos comentários)' ] },
 			{ key: 'comments', question: 'Comentários adicionais, sugestões ou algo que gostaria de destacar', type: 'text', required: false, placeholder: 'Escreva seus comentários, sugestões ou observações aqui...' }
 		]
 
@@ -492,3 +492,19 @@ export default {
 }
 </script>
 
+<style scoped>
+/* Override .card inherited color for textarea text */
+textarea.text-gray-800 {
+	color: #1f2937 !important;
+}
+
+.card textarea.text-gray-800 {
+	color: #1f2937 !important;
+}
+
+/* Disabled button styles */
+button:disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+}
+</style>
