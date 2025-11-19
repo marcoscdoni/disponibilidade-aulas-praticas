@@ -3,10 +3,14 @@
 	<div class="container mx-auto px-4 py-8 max-w-2xl pb-20">
 			<!-- Header -->
 			<div class="text-center mb-8 animate-fade-in">
-				<h1 class="text-4xl md:text-5xl font-bold text-white mb-2">Pesquisa de Satisfação</h1>
-				<p class="text-blue-100 opacity-90 leading-relaxed">Sua opinião é muito importante para nós! Este questionário leva apenas 3 minutos.</p>
-				<p v-if="tokenState.status === 'ready' && tokenState.data" class="text-sm text-blue-200 mt-2">Respondendo pesquisa como: <strong>{{ tokenState.data.nome_aluno }}</strong></p>
-			</div>
+					<h1 class="text-4xl md:text-5xl font-bold text-white mb-2">Pesquisa de Satisfação</h1>
+					<p class="text-blue-100 opacity-90 leading-relaxed">Sua opinião é muito importante para nós! Este questionário leva apenas 3 minutos.</p>
+					<!-- token info / validation messages -->
+					<p v-if="tokenState.status === 'loading'" class="text-sm text-yellow-200 mt-2">Validando token...</p>
+					<p v-else-if="tokenState.status === 'ready' && tokenState.data && tokenState.data.tokenStatus === 'valid'" class="text-sm text-blue-200 mt-2">Respondendo pesquisa como: <strong>{{ tokenState.data.name }}</strong></p>
+					<p v-else-if="tokenState.status === 'ready' && tokenState.data && tokenState.data.tokenStatus !== 'valid'" class="text-sm text-red-300 mt-2">{{ tokenState.data.error || 'Token inválido ou expirado' }}</p>
+					<p v-else-if="tokenState.status === 'error'" class="text-sm text-red-300 mt-2">{{ tokenState.error || 'Erro ao validar token' }}</p>
+				</div>
 
 			<!-- Progress Bar -->
 			<div class="mb-8">
@@ -21,10 +25,13 @@
 			<div v-if="currentStep === 0" class="card text-center animate-slide-in-right mb-5">
 					<div class="text-6xl mb-6">🎯</div>
 					<h2 class="text-3xl font-bold text-gray-800 mb-4">{{ welcomeTitle }}</h2>
-				<p class="text-gray-600 text-lg mb-6 leading-relaxed">Vamos começar nossa pesquisa de satisfação. Suas respostas nos ajudam a melhorar nossos serviços continuamente.</p>
-				<p class="text-sm text-red-500 mb-8">* Indica uma pergunta obrigatória</p>
-				<button @click="nextStep" class="btn-primary">Começar Pesquisa</button>
-			</div>
+					<p class="text-gray-600 text-lg mb-6 leading-relaxed">Vamos começar nossa pesquisa de satisfação. Suas respostas nos ajudam a melhorar nossos serviços continuamente.</p>
+					<p class="text-sm text-red-500 mb-8">* Indica uma pergunta obrigatória</p>
+					<!-- Button availability depends on token validation -->
+					<div v-if="tokenState.status === 'loading'" class="mb-4 text-sm text-gray-600">Validando token...</div>
+					<div v-else-if="tokenState.status === 'ready' && tokenState.data && tokenState.data.tokenStatus !== 'valid'" class="mb-4 text-sm text-red-500">{{ tokenState.data.error || 'Token inválido ou expirado' }}</div>
+					<button v-else @click="nextStep" class="btn-primary">Começar Pesquisa</button>
+				</div>
 
 			<!-- Question Steps -->
 					<transition name="question-transition" mode="out-in">
@@ -207,6 +214,15 @@ export default {
 			if (!name) return 'Bem-vindo!'
 			const first = String(name).split(' ')[0] || name
 			return `Olá ${first.charAt(0).toUpperCase() + first.slice(1).toLowerCase()}`
+		})
+
+		const isTokenValidForStart = computed(() => {
+			if (tokenState.status === 'ready' && tokenState.data) {
+				return String(tokenState.data.tokenStatus || '').toLowerCase() === 'valid'
+			}
+			// if token not checked yet (idle) allow start for local/dev
+			if (tokenState.status === 'idle') return true
+			return false
 		})
 
 		const getQuestionType = (type) => ({ nps: 'Escala 0-10', likert: 'Escala de satisfação', multiple: 'Múltipla escolha', text: 'Texto livre' }[type] || '')
