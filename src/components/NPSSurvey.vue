@@ -1,6 +1,6 @@
 <template>
-	<div class="min-h-screen bg-gradient-to-br">
-		<div class="container mx-auto px-4 py-8 max-w-2xl">
+	<div class="min-h-screen bg-gradient-to-br relative">
+	<div class="container mx-auto px-4 py-8 max-w-2xl pb-20">
 			<!-- Header -->
 			<div class="text-center mb-8 animate-fade-in">
 				<h1 class="text-4xl md:text-5xl font-bold text-white mb-2">Pesquisa de Satisfação</h1>
@@ -18,7 +18,7 @@
 			</div>
 
 			<!-- Welcome -->
-			<div v-if="currentStep === 0" class="card text-center animate-slide-in-right">
+			<div v-if="currentStep === 0" class="card text-center animate-slide-in-right mb-5">
 				<div class="text-6xl mb-6">🎯</div>
 				<h2 class="text-3xl font-bold text-gray-800 mb-4">Bem-vindo!</h2>
 				<p class="text-gray-600 text-lg mb-6 leading-relaxed">Vamos começar nossa pesquisa de satisfação. Suas respostas nos ajudam a melhorar nossos serviços continuamente.</p>
@@ -28,7 +28,7 @@
 
 			<!-- Question Steps -->
 					<transition name="question-transition" mode="out-in">
-						<div v-if="currentStep > 0 && questions && currentStep <= questions.length" key="question" class="card animate-slide-in-right" ref="cardRef">
+						<div v-if="currentStep > 0 && questions && currentStep <= questions.length" key="question" class="card animate-slide-in-right mb-5" ref="cardRef">
 					<div class="mb-6">
 						<div class="flex items-center justify-between mb-4">
 							<span class="text-sm font-semibold text-blue-600 bg-blue-100 px-3 py-1 rounded-full">Pergunta {{ currentStep }}</span>
@@ -90,15 +90,22 @@
 			</transition>
 
 			<!-- Thank you / loading / error screens -->
-			<div v-if="currentStep > questions.length && !isSubmitting" class="card text-center animate-slide-in-right">
+			<div v-if="currentStep > questions.length && !isSubmitting" class="card text-center animate-slide-in-right mb-5">
 				<div class="text-6xl mb-6">🎉</div>
 				<h2 class="text-3xl font-bold text-gray-800 mb-4">Obrigado!</h2>
 				<p class="text-gray-600 text-lg mb-8 leading-relaxed">Sua pesquisa foi enviada com sucesso. Suas respostas são muito importantes para nós!</p>
 			</div>
 
-			<div v-if="isSubmitting" class="card text-center"><div class="animate-spin w-16 h-16 border-4 border-green-500 border-t-transparent rounded-full mx-auto mb-6"></div><h2 class="text-2xl font-bold text-gray-800 mb-4">Enviando...</h2><p class="text-gray-600">Aguarde enquanto enviamos sua pesquisa.</p></div>
+			<div v-if="isSubmitting" class="card text-center mb-5"><div class="animate-spin w-16 h-16 border-4 border-green-500 border-t-transparent rounded-full mx-auto mb-6"></div><h2 class="text-2xl font-bold text-gray-800 mb-4">Enviando...</h2><p class="text-gray-600">Aguarde enquanto enviamos sua pesquisa.</p></div>
 
-			<div v-if="submitError" class="card text-center"><div class="text-6xl mb-6">❌</div><h2 class="text-3xl font-bold text-red-600 mb-4">Erro ao Enviar</h2><p class="text-gray-600 text-lg mb-8">{{ submitError }}</p><button @click="retrySubmit" class="btn-primary mr-4">Tentar Novamente</button><button @click="resetSurvey" class="btn-secondary">Recomeçar</button></div>
+			<div v-if="submitError" class="card text-center mb-5"><div class="text-6xl mb-6">❌</div><h2 class="text-3xl font-bold text-red-600 mb-4">Erro ao Enviar</h2><p class="text-gray-600 text-lg mb-8">{{ submitError }}</p><button @click="retrySubmit" class="btn-primary mr-4">Tentar Novamente</button><button @click="resetSurvey" class="btn-secondary">Recomeçar</button></div>
+
+
+
+			<!-- logo aligned to bottom of the viewport while staying inside the container DOM position -->
+			<div class="absolute bottom-[10px] left-0 w-full flex justify-center pointer-events-none">
+				<img :src="logoSvg" alt="Logo" class="h-12 opacity-95" />
+			</div>
 
 		</div>
 	</div>
@@ -110,6 +117,7 @@ import LikertScale from './LikertScale.vue'
 import MultipleChoice from './MultipleChoice.vue'
 import NAButton from './NAButton.vue'
 import { submitToN8n, config } from '../config/n8n.js'
+import logoSvg from '../assets/logo.svg'
 
 export default {
 	name: 'NPSSurvey',
@@ -262,7 +270,7 @@ export default {
 					Object.keys(naFlags).forEach(k => { naFlags[k] = false })
 				}
 
-				return { currentStep, questions, totalSteps, currentQuestion, progressPercentage, formData, isSubmitting, submitError, stepError, config, getQuestionType, setAnswer, onNAChange, naFlags, toggleNA, nextStep, previousStep, submitSurvey, retrySubmit, resetSurvey }
+				return { currentStep, questions, totalSteps, currentQuestion, progressPercentage, formData, isSubmitting, submitError, stepError, config, getQuestionType, setAnswer, onNAChange, naFlags, toggleNA, nextStep, previousStep, submitSurvey, retrySubmit, resetSurvey, logoSvg }
 	}
 }
 </script>
