@@ -117,7 +117,10 @@ const startServer = async () => {
   } else {
     const distPath = path.join(__dirname, '../dist')
     app.use(express.static(distPath))
-    app.use('*', (req, res) => res.sendFile(path.join(distPath, 'index.html')))
+    // Fallback para SPA - todas as rotas não encontradas servem o index.html
+    app.use((req, res) => {
+      res.sendFile(path.join(distPath, 'index.html'))
+    })
   }
 
   app.listen(port, () => {

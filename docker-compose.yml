@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  nps-survey:
+    build: .
+    container_name: nps-modelo
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - NPS_SURVEY_WEBHOOK_URL=${NPS_SURVEY_WEBHOOK_URL}
+      - NPS_VALIDATION_WEBHOOK_URL=${NPS_VALIDATION_WEBHOOK_URL}
+      - NPS_API_KEY=${NPS_API_KEY}
+      - NPS_API_KEY_HEADER=${NPS_API_KEY_HEADER:-x-api-key}
+    env_file:
+      - .env
+    networks:
+      - nps-network
+
+networks:
+  nps-network:
+    driver: bridge

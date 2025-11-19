@@ -1,0 +1,27 @@
+# Adicione este serviço ao seu docker-compose.yml existente da Hetzner
+
+  nps-survey:
+    build:
+      context: ./nps-modelo
+      dockerfile: Dockerfile
+    container_name: nps-survey
+    restart: always
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - TZ=America/Sao_Paulo
+      - NPS_SURVEY_WEBHOOK_URL=${NPS_SURVEY_WEBHOOK_URL}
+      - NPS_VALIDATION_WEBHOOK_URL=${NPS_VALIDATION_WEBHOOK_URL}
+      - NPS_API_KEY=${NPS_API_KEY}
+      - NPS_API_KEY_HEADER=${NPS_API_KEY_HEADER:-x-api-key}
+    networks:
+      - infra_default
+    expose:
+      - "3000"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.nps-survey.rule=Host(`survey.vempramodelo.com`)"
+      - "traefik.http.routers.nps-survey.entrypoints=websecure"
+      - "traefik.http.routers.nps-survey.tls.certresolver=letsencrypt"
+      - "traefik.http.services.nps-survey.loadbalancer.server.port=3000"
+      - "traefik.docker.network=infra_default"

@@ -298,38 +298,48 @@ export default {
 			}
 		}
 
-		onMounted(async () => {
-			const token = extractTokenFromUrl()
-			if (!token) return
-			tokenState.status = 'loading'
-			tokenState.token = token
-			try {
-				const result = await validateTokenWithBackend(token)
-				if (result.success) {
-					// backend may return an array or object
-					const student = Array.isArray(result.data) ? result.data[0] : result.data
-					tokenState.data = student || null
-					tokenState.status = student ? 'ready' : 'error'
-					if (!student) tokenState.error = 'Dados do aluno não retornados.'
-					
-					// Load saved progress if token is valid
-					if (student && String(student.tokenStatus || '').toLowerCase() === 'valid') {
-						loadProgress()
-					}
-				} else {
-					tokenState.status = 'error'
-					tokenState.error = result.error || 'Token inválido'
-				}
-			} catch (err) {
+	onMounted(async () => {
+		const token = extractTokenFromUrl()
+		const isProduction = import.meta.env.PROD
+		
+		// Em produção, se não houver token, exibe erro
+		if (!token) {
+			if (isProduction) {
 				tokenState.status = 'error'
-				tokenState.error = err.message || String(err)
+				tokenState.error = 'Link inválido. Token de acesso não fornecido.'
 			}
-		})
+			return
+		}
+		
+		tokenState.status = 'loading'
+		tokenState.token = token
+		try {
+			const result = await validateTokenWithBackend(token)
+			if (result.success) {
+				// backend may return an array or object
+				const student = Array.isArray(result.data) ? result.data[0] : result.data
+				tokenState.data = student || null
+				tokenState.status = student ? 'ready' : 'error'
+				if (!student) tokenState.error = 'Dados do aluno não retornados.'
+				
+				// Load saved progress if token is valid
+				if (student && String(student.tokenStatus || '').toLowerCase() === 'valid') {
+					loadProgress()
+				}
+			} else {
+				tokenState.status = 'error'
+				tokenState.error = result.error || 'Token inválido'
+			}
+		} catch (err) {
+			tokenState.status = 'error'
+			tokenState.error = err.message || String(err)
+		}
+	})
 
-		const isTokenUsed = computed(() => {
-			if (!tokenState.data) return false
-			return tokenState.data.tokenUsedAt != null
-		})
+	const isTokenUsed = computed(() => {
+		if (!tokenState.data) return false
+		return tokenState.data.tokenUsedAt != null
+	})
 
 		const tokenErrorMessage = computed(() => {
 			if (isTokenUsed.value) {
