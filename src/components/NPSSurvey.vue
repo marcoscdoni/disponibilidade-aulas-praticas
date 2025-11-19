@@ -120,9 +120,9 @@
 						</div>
 
 												<div v-else-if="currentQuestion.type === 'likert'">
-																									<div v-if="currentQuestion.key.includes('practical')" class="mb-4">
+																									<div v-if="currentQuestion.naOption?.enabled" class="mb-4">
 																										<!-- nicer NA button component -->
-																										<NAButton v-model="naFlags[currentQuestion.key]" :label="'Não fiz essa categoria'" size="xl" />
+																										<NAButton v-model="naFlags[currentQuestion.key]" :label="currentQuestion.naOption.label" size="xl" />
 																									</div>
 
 													<div v-if="!naFlags[currentQuestion.key]">
@@ -182,6 +182,7 @@ import NAButton from './NAButton.vue'
 import Spinner from './Spinner.vue'
 import Alert from './Alert.vue'
 import { submitToN8n, config, validateTokenWithBackend } from '../config/n8n.js'
+import { loadQuestions, getInitialFormData, getInitialNAFlags, getQuestionTypeLabel, validateQuestion as validateQuestionHelper } from '../config/questionsHelper.js'
 import logoSvg from '../assets/logo.svg'
 
 export default {
@@ -195,40 +196,15 @@ export default {
 		const submitError = ref('')
 		const stepError = ref('')
 
-			const formData = reactive({
-			npsScore: null,
-			overallSatisfaction: null,
-			receptionService: null,
-			theoryClasses: null,
-				practicalCarClasses: null,
-				practicalMotoClasses: null,
-				practicalInstructorCar: null,
-				practicalInstructorMoto: null,
-			vehicleConditions: null,
-			infrastructure: null,
-			dislikes: [],
-			likes: [],
-			comments: ''
-		})
-
-		const questions = [
-			{ key: 'npsScore', question: 'De 0 a 10, quanto você indicaria nossa autoescola para amigos e familiares?', type: 'nps', required: true },
-			{ key: 'overallSatisfaction', question: 'Como você avalia sua satisfação geral com nossa autoescola?', type: 'likert', required: true },
-			{ key: 'receptionService', question: 'Como você avalia o atendimento da recepção e equipe administrativa?', type: 'likert', required: true },
-			{ key: 'theoryClasses', question: 'Como você avalia a qualidade das aulas teóricas?', type: 'likert', required: true },
-			{ key: 'practicalCarClasses', question: 'Como você avalia a qualidade das aulas práticas de carro?', type: 'likert', required: false, description: 'Marque "Não fiz aula de carro" se não participou de aulas de carro.' },
-			{ key: 'practicalMotoClasses', question: 'Como você avalia a qualidade das aulas práticas de moto?', type: 'likert', required: false, description: 'Marque "Não fiz aula de moto" se não participou de aulas de moto.' },
-			{ key: 'practicalInstructorCar', question: 'Como você avalia o instrutor nas aulas práticas de carro?', type: 'likert', required: false, description: 'Marque "Não fiz aula de carro" se não participou de aulas de carro.' },
-			{ key: 'practicalInstructorMoto', question: 'Como você avalia o instrutor nas aulas práticas de moto?', type: 'likert', required: false, description: 'Marque "Não fiz aula de moto" se não participou de aulas de moto.' },
-			{ key: 'vehicleConditions', question: 'Como você avalia as condições dos veículos utilizados nas aulas práticas?', type: 'likert', required: true },
-			{ key: 'infrastructure', question: 'Como você avalia a infraestrutura da autoescola (salas, banheiros, recepção)?', type: 'likert', required: true },
-			{ key: 'likes', question: 'O que você MAIS gostou?', description: 'Marque todas as opções que se aplicam', type: 'multiple', required: false, options: [ 'Atendimento da equipe','Comunicação clara e transparente','Rapidez no início das aulas','Flexibilidade de horários','Qualidade das aulas teóricas','Qualidade das aulas práticas','Profissionalismo dos instrutores','Estado dos veículos','Infraestrutura moderna e limpa','Facilidade no agendamento','Suporte durante todo o processo','Preço justo','Localização conveniente','Outro (especificar nos comentários)' ] },
-			{ key: 'dislikes', question: 'O que você NÃO gostou?', description: 'Marque todas as opções que se aplicam', type: 'multiple', required: false, options: [ 'Atendimento da recepção','Demora no retorno de mensagens/ligações','Falta de comunicação sobre prazos','Prazo para início do curso teórico','Prazo para início das aulas práticas','Disponibilidade de horários para aulas práticas','Demora no agendamento das provas','Cancelamento de aulas sem aviso','Didática do instrutor teórico','Didática do instrutor prático','Material didático desatualizado','Condições dos veículos','Limpeza e conforto das instalações','Dificuldade para agendar aulas','Falta de suporte durante o processo','Tempo total do processo muito longo','Outro (especificar nos comentários)' ] },
-			{ key: 'comments', question: 'Comentários adicionais, sugestões ou algo que gostaria de destacar', type: 'text', required: false, placeholder: 'Escreva seus comentários, sugestões ou observações aqui...' }
-		]
-
-		// flags for 'not applicable' on practical questions and instructors
-		const naFlags = reactive({ practicalCarClasses: false, practicalMotoClasses: false, practicalInstructorCar: false, practicalInstructorMoto: false })
+		// Load questions from JSON configuration
+		const questionsConfig = loadQuestions()
+		const questions = questionsConfig.questions
+		
+		// Initialize form data dynamically from questions
+		const formData = reactive(getInitialFormData())
+		
+		// Initialize NA flags dynamically
+		const naFlags = reactive(getInitialNAFlags())
 
 		const totalSteps = questions.length
 		const currentQuestion = computed(() => (currentStep.value > 0 && currentStep.value <= questions.length) ? questions[currentStep.value - 1] : null)
@@ -362,9 +338,10 @@ export default {
 
 		const isTokenValidForStart = computed(() => hasValidToken.value)
 
-		const getQuestionType = (type) => ({ nps: 'Escala 0-10', likert: 'Escala de satisfação', multiple: 'Múltipla escolha', text: 'Texto livre' }[type] || '')
+		// Use helper function for question type labels
+		const getQuestionType = getQuestionTypeLabel
 
-				const setAnswer = (value) => { if (currentQuestion.value) { formData[currentQuestion.value.key] = value; stepError.value = '' } }
+		const setAnswer = (value) => { if (currentQuestion.value) { formData[currentQuestion.value.key] = value; stepError.value = '' } }
 
 				const onNAChange = (key) => {
 					if (naFlags[key]) {
@@ -423,10 +400,14 @@ export default {
 			if (!currentQuestion.value) return true
 			const question = currentQuestion.value
 			const answer = formData[question.key]
-			if (question.required) {
-				if (question.type === 'nps' && (answer === null || answer === undefined)) { stepError.value = 'Por favor, selecione uma pontuação de 0 a 10.'; return false }
-						if (question.type === 'likert' && !answer && answer !== 'not_applicable') { stepError.value = 'Por favor, selecione uma opção.'; return false }
+			
+			// Use the helper validation function
+			const validation = validateQuestionHelper(question, answer, naFlags)
+			if (!validation.valid) {
+				stepError.value = validation.error
+				return false
 			}
+			
 			stepError.value = ''
 			return true
 		}

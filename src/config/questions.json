@@ -1,0 +1,172 @@
+{
+  "version": "1.0",
+  "categories": {
+    "car": {
+      "label": "Carro",
+      "description": "Aulas práticas de carro"
+    },
+    "moto": {
+      "label": "Moto",
+      "description": "Aulas práticas de moto"
+    }
+  },
+  "questions": [
+    {
+      "key": "npsScore",
+      "question": "De 0 a 10, quanto você indicaria nossa autoescola para amigos e familiares?",
+      "type": "nps",
+      "required": true,
+      "order": 1
+    },
+    {
+      "key": "overallSatisfaction",
+      "question": "Como você avalia sua satisfação geral com nossa autoescola?",
+      "type": "likert",
+      "required": true,
+      "order": 2
+    },
+    {
+      "key": "receptionService",
+      "question": "Como você avalia o atendimento da recepção e equipe administrativa?",
+      "type": "likert",
+      "required": true,
+      "order": 3
+    },
+    {
+      "key": "theoryClasses",
+      "question": "Como você avalia a qualidade das aulas teóricas?",
+      "type": "likert",
+      "required": true,
+      "order": 4
+    },
+    {
+      "key": "practicalCarClasses",
+      "question": "Como você avalia a qualidade das aulas práticas de carro?",
+      "type": "likert",
+      "required": false,
+      "order": 5,
+      "description": "Marque \"Não fiz aula de carro\" se não participou de aulas de carro.",
+      "category": "car",
+      "conditional": true,
+      "naOption": {
+        "enabled": true,
+        "label": "Não fiz essa categoria"
+      }
+    },
+    {
+      "key": "practicalMotoClasses",
+      "question": "Como você avalia a qualidade das aulas práticas de moto?",
+      "type": "likert",
+      "required": false,
+      "order": 6,
+      "description": "Marque \"Não fiz aula de moto\" se não participou de aulas de moto.",
+      "category": "moto",
+      "conditional": true,
+      "naOption": {
+        "enabled": true,
+        "label": "Não fiz essa categoria"
+      }
+    },
+    {
+      "key": "practicalInstructorCar",
+      "question": "Como você avalia o instrutor nas aulas práticas de carro?",
+      "type": "likert",
+      "required": false,
+      "order": 7,
+      "description": "Marque \"Não fiz aula de carro\" se não participou de aulas de carro.",
+      "category": "car",
+      "conditional": true,
+      "naOption": {
+        "enabled": true,
+        "label": "Não fiz essa categoria"
+      }
+    },
+    {
+      "key": "practicalInstructorMoto",
+      "question": "Como você avalia o instrutor nas aulas práticas de moto?",
+      "type": "likert",
+      "required": false,
+      "order": 8,
+      "description": "Marque \"Não fiz aula de moto\" se não participou de aulas de moto.",
+      "category": "moto",
+      "conditional": true,
+      "naOption": {
+        "enabled": true,
+        "label": "Não fiz essa categoria"
+      }
+    },
+    {
+      "key": "vehicleConditions",
+      "question": "Como você avalia as condições dos veículos utilizados nas aulas práticas?",
+      "type": "likert",
+      "required": true,
+      "order": 9
+    },
+    {
+      "key": "infrastructure",
+      "question": "Como você avalia a infraestrutura da autoescola (salas, banheiros, recepção)?",
+      "type": "likert",
+      "required": true,
+      "order": 10
+    },
+    {
+      "key": "likes",
+      "question": "O que você MAIS gostou?",
+      "description": "Marque todas as opções que se aplicam",
+      "type": "multiple",
+      "required": false,
+      "order": 11,
+      "options": [
+        "Atendimento da equipe",
+        "Comunicação clara e transparente",
+        "Rapidez no início das aulas",
+        "Flexibilidade de horários",
+        "Qualidade das aulas teóricas",
+        "Qualidade das aulas práticas",
+        "Profissionalismo dos instrutores",
+        "Estado dos veículos",
+        "Infraestrutura moderna e limpa",
+        "Facilidade no agendamento",
+        "Suporte durante todo o processo",
+        "Preço justo",
+        "Localização conveniente",
+        "Outro (especificar nos comentários)"
+      ]
+    },
+    {
+      "key": "dislikes",
+      "question": "O que você NÃO gostou?",
+      "description": "Marque todas as opções que se aplicam",
+      "type": "multiple",
+      "required": false,
+      "order": 12,
+      "options": [
+        "Atendimento da recepção",
+        "Demora no retorno de mensagens/ligações",
+        "Falta de comunicação sobre prazos",
+        "Prazo para início do curso teórico",
+        "Prazo para início das aulas práticas",
+        "Disponibilidade de horários para aulas práticas",
+        "Demora no agendamento das provas",
+        "Cancelamento de aulas sem aviso",
+        "Didática do instrutor teórico",
+        "Didática do instrutor prático",
+        "Material didático desatualizado",
+        "Condições dos veículos",
+        "Limpeza e conforto das instalações",
+        "Dificuldade para agendar aulas",
+        "Falta de suporte durante o processo",
+        "Tempo total do processo muito longo",
+        "Outro (especificar nos comentários)"
+      ]
+    },
+    {
+      "key": "comments",
+      "question": "Comentários adicionais, sugestões ou algo que gostaria de destacar",
+      "type": "text",
+      "required": false,
+      "order": 13,
+      "placeholder": "Escreva seus comentários, sugestões ou observações aqui..."
+    }
+  ]
+}
