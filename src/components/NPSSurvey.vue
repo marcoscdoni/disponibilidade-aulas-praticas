@@ -21,8 +21,8 @@
 			<!-- Progress Bar -->
 			<div v-if="hasValidToken" class="mb-8">
 				<div class="flex justify-between items-center mb-2">
-					<span class="text-blue-100 text-sm">Progresso</span>
-					<span class="text-blue-100 text-sm">{{ currentStep }} de {{ totalSteps }}</span>
+					<span class="text-blue-100 text-sm">{{ currentStep > totalSteps ? 'Pesquisa enviada' : 'Progresso' }}</span>
+					<span class="text-blue-100 text-sm">{{ currentStep > totalSteps ? '✓ Concluída' : `${currentStep} de ${totalSteps}` }}</span>
 				</div>
 				<div class="progress-bar"><div class="progress-fill" :style="{ width: progressPercentage + '%' }"></div></div>
 			</div>
@@ -244,6 +244,82 @@ export default {
 			return parts.length ? parts[parts.length - 1] : fallbackToken
 		}
 
+		// localStorage persistence helpers
+		const STORAGE_KEY_PREFIX = 'nps_survey_'
+		
+		const getStorageKey = (token) => `${STORAGE_KEY_PREFIX}${token}`
+		
+		const saveProgress = () => {
+			if (!tokenState.token || !hasValidToken.value) return
+			
+			const progressData = {
+				currentStep: currentStep.value,
+				formData: { ...formData },
+				naFlags: { ...naFlags },
+				timestamp: Date.now()
+			}
+			
+			try {
+				localStorage.setItem(getStorageKey(tokenState.token), JSON.stringify(progressData))
+			} catch (error) {
+				console.error('Error saving progress to localStorage:', error)
+			}
+		}
+		
+		const loadProgress = () => {
+			if (!tokenState.token) return false
+			
+			try {
+				const savedData = localStorage.getItem(getStorageKey(tokenState.token))
+				if (!savedData) return false
+				
+				const progressData = JSON.parse(savedData)
+				
+				// Check if data is not too old (e.g., 30 days)
+				const thirtyDaysInMs = 30 * 24 * 60 * 60 * 1000
+				if (Date.now() - progressData.timestamp > thirtyDaysInMs) {
+					clearProgress()
+					return false
+				}
+				
+				// Restore progress
+				if (progressData.currentStep !== undefined) {
+					currentStep.value = progressData.currentStep
+				}
+				
+				if (progressData.formData) {
+					Object.keys(progressData.formData).forEach(key => {
+						if (key in formData) {
+							formData[key] = progressData.formData[key]
+						}
+					})
+				}
+				
+				if (progressData.naFlags) {
+					Object.keys(progressData.naFlags).forEach(key => {
+						if (key in naFlags) {
+							naFlags[key] = progressData.naFlags[key]
+						}
+					})
+				}
+				
+				return true
+			} catch (error) {
+				console.error('Error loading progress from localStorage:', error)
+				return false
+			}
+		}
+		
+		const clearProgress = () => {
+			if (!tokenState.token) return
+			
+			try {
+				localStorage.removeItem(getStorageKey(tokenState.token))
+			} catch (error) {
+				console.error('Error clearing progress from localStorage:', error)
+			}
+		}
+
 		onMounted(async () => {
 			const token = extractTokenFromUrl()
 			if (!token) return
@@ -257,6 +333,11 @@ export default {
 					tokenState.data = student || null
 					tokenState.status = student ? 'ready' : 'error'
 					if (!student) tokenState.error = 'Dados do aluno não retornados.'
+					
+					// Load saved progress if token is valid
+					if (student && String(student.tokenStatus || '').toLowerCase() === 'valid') {
+						loadProgress()
+					}
 				} else {
 					tokenState.status = 'error'
 					tokenState.error = result.error || 'Token inválido'
@@ -307,7 +388,22 @@ export default {
 								onNAChange(k)
 							}
 						})
+						// Save progress when NA flags change
+						saveProgress()
 					}, { deep: true })
+					
+					// Watch formData and currentStep to auto-save progress
+					watch(formData, () => {
+						if (hasValidToken.value && currentStep.value > 0) {
+							saveProgress()
+						}
+					}, { deep: true })
+					
+					watch(currentStep, () => {
+						if (hasValidToken.value && currentStep.value > 0) {
+							saveProgress()
+						}
+					})
 
 						// ref to the currently rendered question card so we can scroll it into view
 						const cardRef = ref(null)
@@ -370,7 +466,11 @@ export default {
 									comments: formData.comments
 								}
 				const result = await submitToN8n(surveyData)
-				if (result.success) currentStep.value++
+				if (result.success) {
+					currentStep.value++
+					// Clear saved progress after successful submission
+					clearProgress()
+				}
 				else submitError.value = result.error || 'Erro desconhecido ao enviar a pesquisa.'
 			} catch (error) { console.error('Submit error:', error); submitError.value = 'Erro de conexão. Verifique sua internet e tente novamente.' }
 			finally { isSubmitting.value = false }
@@ -382,6 +482,8 @@ export default {
 					Object.keys(formData).forEach(key => { if (Array.isArray(formData[key])) formData[key] = [] ; else formData[key] = key === 'npsScore' ? null : '' })
 					// reset NA flags
 					Object.keys(naFlags).forEach(k => { naFlags[k] = false })
+					// Clear saved progress
+					clearProgress()
 				}
 
 				return { currentStep, questions, totalSteps, currentQuestion, progressPercentage, formData, isSubmitting, submitError, stepError, config, getQuestionType, setAnswer, onNAChange, naFlags, toggleNA, nextStep, previousStep, submitSurvey, retrySubmit, resetSurvey, logoSvg, tokenState, welcomeTitle, isTokenValidForStart, hasValidToken }
