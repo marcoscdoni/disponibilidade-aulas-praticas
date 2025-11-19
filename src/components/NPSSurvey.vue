@@ -465,7 +465,8 @@ export default {
 									likes: formData.likes,
 									comments: formData.comments
 								}
-				const result = await submitToN8n(surveyData)
+				// Pass the token as second parameter to submitToN8n
+				const result = await submitToN8n(surveyData, tokenState.token)
 				if (result.success) {
 					currentStep.value++
 					// Clear saved progress after successful submission
