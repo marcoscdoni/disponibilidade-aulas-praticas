@@ -2,9 +2,14 @@
 	<div class="min-h-screen bg-gradient-to-br relative">
 	<div class="container mx-auto px-4 py-8 max-w-2xl pb-20">
 			<!-- Header -->
-			<div class="text-center mb-8 animate-fade-in">
-					<h1 class="text-4xl md:text-5xl font-bold text-white mb-2">Pesquisa de Satisfação</h1>
-					<p class="text-blue-100 opacity-90 leading-relaxed">Sua opinião é muito importante para nós! Este questionário leva apenas 3 minutos.</p>
+	    <div class="text-center mb-8 animate-fade-in">
+										<div class="mb-2">
+											<img :src="logoSvg" alt="Logo" class="h-12 mx-auto mb-2" />
+											<div class="text-center">
+												<div class="text-xl font-semibold text-white leading-tight mb-1">Pesquisa de satisfação</div>
+												<p class="text-blue-100 opacity-90 leading-relaxed">Sua opinião é muito importante para nós! Este questionário leva apenas 3 minutos.</p>
+											</div>
+										</div>
 					<!-- token info / validation messages -->
 					<p v-if="tokenState.status === 'loading'" class="text-sm text-white mt-2 flex items-center justify-center gap-1"> 
 						<Spinner size="sm" color="white" />
@@ -40,33 +45,34 @@
 				<div v-else>
 					<template v-if="tokenState.status === 'ready' && tokenState.data && tokenState.data.tokenStatus !== 'valid'">
 						<div class="py-10 px-6 text-white">
-							<div class="flex flex-col items-center text-center gap-4 max-w-xl mx-auto">
+							<div class="flex flex-col items-center gap-5 max-w-xl mx-auto">
 								<div class="w-16 h-16 rounded-full bg-red-500/15 flex items-center justify-center text-red-200">
-									<svg class="w-9 h-9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+									<svg class="w-9 h-9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
 										<path d="M12 8v4" />
 										<path d="M12 16h.01" />
 										<path d="M10.29 3.86L1.82 18a1 1 0 00.86 1.5h18.64a1 1 0 00.86-1.5L12.71 3.86a1 1 0 00-1.72 0z" />
 									</svg>
 								</div>
-								<div class="space-y-2">
-									<p class="text-2xl font-semibold text-white">Não foi possível validar seu acesso</p>
+								<div class="space-y-3 text-center">
+									<h2 class="text-2xl font-bold text-white">Link inválido</h2>
 									<p class="text-base text-blue-100">{{ tokenState.data.error || 'Acesso inválido. Verifique o link de validação ou contate o suporte.' }}</p>
+									<p class="text-sm text-blue-200">Se precisar, solicite um novo link ao suporte da autoescola.</p>
 								</div>
 							</div>
 						</div>
 					</template>
 					<template v-else-if="tokenState.status === 'error'">
 						<div class="py-10 px-6 text-white">
-							<div class="flex flex-col items-center text-center gap-4 max-w-xl mx-auto">
+							<div class="flex flex-col items-center gap-5 max-w-xl mx-auto">
 								<div class="w-16 h-16 rounded-full bg-yellow-500/15 flex items-center justify-center text-yellow-200">
-									<svg class="w-9 h-9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+									<svg class="w-9 h-9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
 										<path d="M12 8v4" />
 										<path d="M12 16h.01" />
 										<path d="M10.29 3.86L1.82 18a1 1 0 00.86 1.5h18.64a1 1 0 00.86-1.5L12.71 3.86a1 1 0 00-1.72 0z" />
 									</svg>
 								</div>
-								<div class="space-y-2">
-									<p class="text-2xl font-semibold text-white">Não foi possível validar seu acesso</p>
+								<div class="space-y-3 text-center">
+									<h2 class="text-2xl font-bold text-white">Não foi possível validar seu acesso</h2>
 									<p class="text-base text-blue-100">{{ tokenState.error || 'Erro ao validar token. Tente novamente em instantes.' }}</p>
 								</div>
 							</div>
@@ -162,10 +168,7 @@
 
 
 
-			<!-- logo aligned to bottom of the viewport while staying inside the container DOM position -->
-			<div class="absolute bottom-[10px] left-0 w-full flex justify-center pointer-events-none">
-				<img :src="logoSvg" alt="Logo" class="h-12 opacity-95" />
-			</div>
+			<!-- footer logo removed per request -->
 
 		</div>
 	</div>

@@ -7,9 +7,9 @@
       type="button"
       :class="[
         'w-full flex items-start gap-4 p-4 rounded-xl border-2 transition-all duration-300 hover:scale-[1.01]',
-        modelValue.includes(option) 
-          ? 'bg-green-50 border-green-500 text-green-700' 
-          : 'bg-gray-50 border-gray-200 hover:border-green-300 hover:bg-gray-100'
+        modelValue.includes(option)
+          ? 'bg-green-50 border-green-500 text-green-700'
+          : 'bg-gray-50 border-gray-200 hover:border-green-300 hover:bg-gray-100 text-gray-800'
       ]"
       @click="toggleOption(option)"
     >
@@ -23,7 +23,7 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
         </svg>
       </div>
-      <span class="font-medium text-left leading-relaxed text-lg">{{ option }}</span>
+      <span class="mc-label font-medium text-left leading-relaxed text-lg" :class="modelValue.includes(option) ? 'text-green-700' : 'text-gray-700'">{{ option }}</span>
     </button>
   </div>
 </template>
@@ -58,3 +58,4 @@ export default {
   }
 }
 </script>
+

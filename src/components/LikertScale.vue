@@ -20,7 +20,7 @@
       ]">
         <div v-if="modelValue === option.value" class="w-3 h-3 bg-white rounded-full"></div>
       </div>
-  <span class="font-medium text-left text-lg">{{ option.label }}</span>
+      <span class="likert-label font-medium text-left text-lg" :class="modelValue === option.value ? 'text-green-700' : 'text-gray-700'">{{ option.label }}</span>
     </button>
     <div v-if="error" class="text-red-500 text-sm mt-2">{{ error }}</div>
   </div>
@@ -56,3 +56,10 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+/* Force dark text color on unselected options - override .card inherited color */
+.likert-label.text-gray-700 { color: #374151 !important; }
+.likert-label.text-green-700 { color: #15803d !important; }
+button .likert-label.text-gray-700 { color: #374151 !important; }
+</style>

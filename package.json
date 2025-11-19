@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "cross-env NODE_ENV=development node server/index.js",
+    "dev": "cross-env NODE_ENV=development nodemon --watch server --watch src --ext js,vue,css --exec \"node server/index.js\"",
     "build": "vite build",
     "preview": "cross-env NODE_ENV=production node server/index.js",
     "start": "cross-env NODE_ENV=production node server/index.js"
@@ -14,9 +14,12 @@
     "vue": "^3.3.11"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.1.17",
     "@vitejs/plugin-vue": "^4.5.2",
+    "autoprefixer": "^10.4.22",
     "cross-env": "^10.1.0",
+    "nodemon": "^2.0.22",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.13",
     "vite": "^5.0.8"
   }
 }
