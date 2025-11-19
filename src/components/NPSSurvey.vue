@@ -312,7 +312,7 @@ export default {
 					Object.keys(naFlags).forEach(k => { naFlags[k] = false })
 				}
 
-				return { currentStep, questions, totalSteps, currentQuestion, progressPercentage, formData, isSubmitting, submitError, stepError, config, getQuestionType, setAnswer, onNAChange, naFlags, toggleNA, nextStep, previousStep, submitSurvey, retrySubmit, resetSurvey, logoSvg }
+				return { currentStep, questions, totalSteps, currentQuestion, progressPercentage, formData, isSubmitting, submitError, stepError, config, getQuestionType, setAnswer, onNAChange, naFlags, toggleNA, nextStep, previousStep, submitSurvey, retrySubmit, resetSurvey, logoSvg, tokenState, welcomeTitle }
 	}
 }
 </script>
