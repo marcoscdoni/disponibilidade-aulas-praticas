@@ -12,153 +12,230 @@
   },
   "questions": [
     {
-      "key": "npsScore",
-      "question": "De 0 a 10, quanto você indicaria nossa autoescola para amigos e familiares?",
-      "type": "nps",
+      "key": "availableAnytime",
+      "question": "Você pode fazer aula em qualquer horário entre 07h00 até 18h50?",
+      "description": "Lembre-se que quanto mais horários você tiver, mais rápido será o término das aulas. Porém, só informe horários que realmente poderá fazer as aulas.",
+      "type": "radio",
+      "options": ["Sim", "Não"],
       "required": true,
       "order": 1
     },
     {
-      "key": "overallSatisfaction",
-      "question": "Como você avalia sua satisfação geral com nossa autoescola?",
-      "type": "likert",
-      "required": true,
-      "order": 2
+      "key": "mondayAvailability",
+      "question": "As SEGUNDAS você pode fazer aula em qual horário?",
+      "type": "multiple",
+      "description": "Selecione todos os blocos horários em que você pode participar às segundas-feiras. Horários fora do comercial (antes das 8h e após 18h) podem demorar mais para iniciar as aulas.",
+      "required": false,
+      "order": 2,
+      "conditional": true,
+      "showIf": { "availableAnytime": ["Não"] },
+      "options": [
+        "07:00 às 07:50",
+        "07:50 às 08:40",
+        "08:40 às 09:30",
+        "09:30 às 10:20",
+        "10:20 às 11:10",
+        "11:10 às 12:00",
+        "12:00 às 12:50",
+        "13:00 às 13:50",
+        "13:50 às 14:40",
+        "14:40 às 15:30",
+        "15:30 às 16:20",
+        "16:20 às 17:10",
+        "17:10 às 18:00",
+        "18:00 às 18:50",
+        "18:50 às 19:40",
+        "19:40 às 20:30",
+        "20:30 às 21:20"
+      ]
     },
     {
-      "key": "receptionService",
-      "question": "Como você avalia o atendimento da recepção e equipe administrativa?",
-      "type": "likert",
-      "required": true,
-      "order": 3
+      "key": "tuesdayAvailability",
+      "question": "As TERÇAS você pode fazer aula em qual horário?",
+      "type": "multiple",
+      "description": "Selecione todos os blocos horários em que você pode participar às terças-feiras. Horários fora do comercial (antes das 8h e após 18h) podem demorar mais para iniciar as aulas.",
+      "required": false,
+      "order": 3,
+      "conditional": true,
+      "showIf": { "availableAnytime": ["Não"] },
+      "options": [
+        "07:00 às 07:50",
+        "07:50 às 08:40",
+        "08:40 às 09:30",
+        "09:30 às 10:20",
+        "10:20 às 11:10",
+        "11:10 às 12:00",
+        "12:00 às 12:50",
+        "13:00 às 13:50",
+        "13:50 às 14:40",
+        "14:40 às 15:30",
+        "15:30 às 16:20",
+        "16:20 às 17:10",
+        "17:10 às 18:00",
+        "18:00 às 18:50",
+        "18:50 às 19:40",
+        "19:40 às 20:30",
+        "20:30 às 21:20"
+      ]
     },
     {
-      "key": "theoryClasses",
-      "question": "Como você avalia a qualidade das aulas teóricas?",
-      "type": "likert",
-      "required": true,
-      "order": 4
+      "key": "wednesdayAvailability",
+      "question": "As QUARTAS você pode fazer aula em qual horário?",
+      "type": "multiple",
+      "description": "Selecione todos os blocos horários em que você pode participar às quartas-feiras. Horários fora do comercial (antes das 8h e após 18h) podem demorar mais para iniciar as aulas.",
+      "required": false,
+      "order": 4,
+      "conditional": true,
+      "showIf": { "availableAnytime": ["Não"] },
+      "options": [
+        "07:00 às 07:50",
+        "07:50 às 08:40",
+        "08:40 às 09:30",
+        "09:30 às 10:20",
+        "10:20 às 11:10",
+        "11:10 às 12:00",
+        "12:00 às 12:50",
+        "13:00 às 13:50",
+        "13:50 às 14:40",
+        "14:40 às 15:30",
+        "15:30 às 16:20",
+        "16:20 às 17:10",
+        "17:10 às 18:00",
+        "18:00 às 18:50",
+        "18:50 às 19:40",
+        "19:40 às 20:30",
+        "20:30 às 21:20"
+      ]
     },
     {
-      "key": "practicalCarClasses",
-      "question": "Como você avalia a qualidade das aulas práticas de carro?",
-      "type": "likert",
-      "required": true,
+      "key": "thursdayAvailability",
+      "question": "As QUINTAS você pode fazer aula em qual horário?",
+      "type": "multiple",
+      "description": "Selecione todos os blocos horários em que você pode participar às quintas-feiras. Horários fora do comercial (antes das 8h e após 18h) podem demorar mais para iniciar as aulas.",
+      "required": false,
       "order": 5,
-      "category": "car",
       "conditional": true,
-      "showIf": {
-        "studentCategory": ["B", "AB"]
-      }
+      "showIf": { "availableAnytime": ["Não"] },
+      "options": [
+        "07:00 às 07:50",
+        "07:50 às 08:40",
+        "08:40 às 09:30",
+        "09:30 às 10:20",
+        "10:20 às 11:10",
+        "11:10 às 12:00",
+        "12:00 às 12:50",
+        "13:00 às 13:50",
+        "13:50 às 14:40",
+        "14:40 às 15:30",
+        "15:30 às 16:20",
+        "16:20 às 17:10",
+        "17:10 às 18:00",
+        "18:00 às 18:50",
+        "18:50 às 19:40",
+        "19:40 às 20:30",
+        "20:30 às 21:20"
+      ]
     },
     {
-      "key": "practicalMotoClasses",
-      "question": "Como você avalia a qualidade das aulas práticas de moto?",
-      "type": "likert",
-      "required": true,
+      "key": "fridayAvailability",
+      "question": "As SEXTAS você pode fazer aula em qual horário?",
+      "type": "multiple",
+      "description": "Selecione todos os blocos horários em que você pode participar às sextas-feiras. Horários fora do comercial (antes das 8h e após 18h) podem demorar mais para iniciar as aulas.",
+      "required": false,
       "order": 6,
-      "category": "moto",
       "conditional": true,
-      "showIf": {
-        "studentCategory": ["A", "AB"]
-      }
+      "showIf": { "availableAnytime": ["Não"] },
+      "options": [
+        "07:00 às 07:50",
+        "07:50 às 08:40",
+        "08:40 às 09:30",
+        "09:30 às 10:20",
+        "10:20 às 11:10",
+        "11:10 às 12:00",
+        "12:00 às 12:50",
+        "13:00 às 13:50",
+        "13:50 às 14:40",
+        "14:40 às 15:30",
+        "15:30 às 16:20",
+        "16:20 às 17:10",
+        "17:10 às 18:00",
+        "18:00 às 18:50",
+        "18:50 às 19:40",
+        "19:40 às 20:30",
+        "20:30 às 21:20"
+      ]
     },
     {
-      "key": "practicalInstructorCar",
-      "question": "Como você avalia o instrutor nas aulas práticas de carro?",
-      "type": "likert",
-      "required": true,
+      "key": "saturdayAvailability",
+      "question": "Aos SÁBADOS você pode fazer aula em qual horário?",
+      "type": "multiple",
+      "description": "Selecione todos os blocos horários em que você pode participar aos sábados.",
+      "required": false,
       "order": 7,
-      "category": "car",
       "conditional": true,
-      "showIf": {
-        "studentCategory": ["B", "AB"]
-      }
+      "showIf": { "availableAnytime": ["Não"] },
+      "options": [
+        "07:00 às 07:50",
+        "07:50 às 08:40",
+        "08:40 às 09:30",
+        "09:30 às 10:20",
+        "10:20 às 11:10",
+        "11:10 às 12:00"
+      ]
     },
     {
-      "key": "practicalInstructorMoto",
-      "question": "Como você avalia o instrutor nas aulas práticas de moto?",
-      "type": "likert",
+      "key": "knowledgeCar",
+      "question": "Qual seu nível de conhecimento em relação ao CARRO?   🚗 🚗 🚗",
+      "type": "radio",
+      "options": ["Nunca dirigi", "Noção Básica", "Já tenho experiência"],
       "required": true,
       "order": 8,
+      "category": "car",
+      "conditional": true,
+      "showIf": { "studentCategory": ["B", "AB"] }
+    },
+    {
+      "key": "instrutor_preferencia_carro",
+      "question": "Qual instrutor você prefere para carro?   👨‍🏫  🚗",
+      "type": "radio",
+      "description": "Selecione o instrutor de sua preferência para as aulas de carro.",
+      "required": false,
+      "order": 9,
+      "category": "car",
+      "conditional": true,
+      "showIf": { "studentCategory": ["B", "AB"] },
+      "options": ["Carregando instrutores..."]
+    },
+    {
+      "key": "knowledgeMoto",
+      "question": "Qual seu nível de conhecimento em relação a MOTO?    🏍️ 🏍️ 🏍️",
+      "type": "radio",
+      "options": ["Nunca dirigi", "Noção Básica", "Já tenho experiência"],
+      "required": true,
+      "order": 10,
       "category": "moto",
       "conditional": true,
-      "showIf": {
-        "studentCategory": ["A", "AB"]
-      }
+      "showIf": { "studentCategory": ["A", "AB"] }
     },
     {
-      "key": "vehicleConditions",
-      "question": "Como você avalia as condições dos veículos utilizados nas aulas práticas?",
-      "type": "likert",
-      "required": true,
-      "order": 9
-    },
-    {
-      "key": "infrastructure",
-      "question": "Como você avalia a infraestrutura da autoescola (salas, banheiros, recepção)?",
-      "type": "likert",
-      "required": true,
-      "order": 10
-    },
-    {
-      "key": "likes",
-      "question": "O que você MAIS gostou?",
-      "description": "Marque todas as opções que se aplicam",
-      "type": "multiple",
+      "key": "instrutor_preferencia_moto",
+      "question": "Qual instrutor para moto?  👨‍🏫   🏍️",
+      "type": "radio",
+      "description": "Selecione o instrutor de sua preferência para as aulas de moto.",
       "required": false,
       "order": 11,
-      "options": [
-        "Atendimento da equipe",
-        "Comunicação clara e transparente",
-        "Rapidez no início das aulas",
-        "Flexibilidade de horários",
-        "Qualidade das aulas teóricas",
-        "Qualidade das aulas práticas",
-        "Profissionalismo dos instrutores",
-        "Estado dos veículos",
-        "Infraestrutura moderna e limpa",
-        "Facilidade no agendamento",
-        "Suporte durante todo o processo",
-        "Preço justo",
-        "Localização conveniente",
-        "Outro (especificar nos comentários)"
-      ]
+      "category": "moto",
+      "conditional": true,
+      "showIf": { "studentCategory": ["A", "AB"] },
+      "options": ["Carregando instrutores..."]
     },
     {
-      "key": "dislikes",
-      "question": "O que você NÃO gostou?",
-      "description": "Marque todas as opções que se aplicam",
-      "type": "multiple",
-      "required": false,
-      "order": 12,
-      "options": [
-        "Atendimento da recepção",
-        "Demora no retorno de mensagens/ligações",
-        "Falta de comunicação sobre prazos",
-        "Prazo para início do curso teórico",
-        "Prazo para início das aulas práticas",
-        "Disponibilidade de horários para aulas práticas",
-        "Demora no agendamento das provas",
-        "Cancelamento de aulas sem aviso",
-        "Didática do instrutor teórico",
-        "Didática do instrutor prático",
-        "Material didático desatualizado",
-        "Condições dos veículos",
-        "Limpeza e conforto das instalações",
-        "Dificuldade para agendar aulas",
-        "Falta de suporte durante o processo",
-        "Tempo total do processo muito longo",
-        "Outro (especificar nos comentários)"
-      ]
-    },
-    {
-      "key": "comments",
-      "question": "Comentários adicionais, sugestões ou algo que gostaria de destacar",
+      "key": "additionalScheduleInfo",
+      "question": "Deseja colocar informações adicionais sobre seus horários?",
       "type": "text",
       "required": false,
-      "order": 13,
-      "placeholder": "Escreva seus comentários, sugestões ou observações aqui..."
+      "order": 12,
+      "placeholder": "Ex.: só posso após as 18h às terças e quintas"
     }
   ]
 }

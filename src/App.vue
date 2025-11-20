@@ -1,16 +1,16 @@
 <template>
   <div id="app">
-    <NPSSurvey />
+    <AvailabilityForm />
   </div>
 </template>
 
 <script>
-import NPSSurvey from './components/NPSSurvey.vue'
+import AvailabilityForm from './components/AvailabilityForm.vue'
 
 export default {
   name: 'App',
   components: {
-    NPSSurvey
+    AvailabilityForm
   }
 }
 </script>

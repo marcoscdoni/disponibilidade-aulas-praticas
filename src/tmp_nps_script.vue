@@ -214,7 +214,7 @@ export default {
 		}
 
 			const extractTokenFromUrl = () => {
-				const fallbackToken = (import.meta.env.NPS_DEFAULT_TOKEN || '').trim() || null
+				const fallbackToken = (import.meta.env.DEFAULT_TOKEN || '').trim() || null
 			if (typeof window === 'undefined') return fallbackToken
 			const currentUrl = new URL(window.location.href)
 			const queryToken = currentUrl.searchParams.get('token')

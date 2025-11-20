@@ -1,28 +1,25 @@
 <template>
 	<div class="min-h-screen bg-gradient-to-br relative">
 	<div class="container mx-auto px-4 py-8 max-w-2xl pb-20">
-			<!-- Header -->
-	    <div class="text-center mb-8 animate-fade-in">
+			<!-- Header with conditional content -->
+	    <div class="text-center mb-8 animate-fade-in py-6 -mx-4 px-4">
 										<div class="mb-2">
-											<img :src="logoSvg" alt="Logo" class="h-12 mx-auto mb-2" />
+											<img :src="logoSvg" alt="Logo" class="h-10 mx-auto mb-4" />
 											<div class="text-center">
-												<div class="text-xl font-semibold text-white leading-tight mb-1">Pesquisa de satisfação</div>
-												<p class="text-blue-100 opacity-90 leading-relaxed">Sua opinião é muito importante para nós! Este questionário leva apenas 3 minutos.</p>
+												<!-- Always show header text -->
+												<div class="text-xl font-semibold text-white leading-tight mb-1">Disponibilidade para Aulas Práticas</div>
+												<p v-if="!isTokenUsed" class="text-blue-100 leading-relaxed">Informe sua disponibilidade de horários para as aulas práticas. Leva apenas 3 minutos.</p>
 											</div>
 										</div>
 					<!-- token info / validation messages -->
-					<p v-if="tokenState.status === 'loading'" class="text-sm text-white mt-2 flex items-center justify-center gap-1"> 
-						<Spinner size="sm" color="white" />
-						<span>Carregando sua pesquisa</span>
-					</p>
-					<p v-else-if="tokenState.status === 'ready' && tokenState.data && tokenState.data.tokenStatus === 'valid'" class="text-sm text-white mt-2">Respondendo pesquisa como: <strong>{{ tokenState.data.name }}</strong></p>
+					<p v-if="tokenState.status === 'ready' && tokenState.data && tokenState.data.tokenStatus === 'valid'" class="text-sm text-white mt-2">Preenchendo disponibilidade como: <strong>{{ tokenState.data.name }}</strong></p>
 				</div>
 
 			<!-- Progress Bar -->
 			<div v-if="hasValidToken" class="mb-8">
 				<div class="flex justify-between items-center mb-2">
-					<span class="text-blue-100 text-sm">{{ currentStep > totalSteps ? 'Pesquisa enviada' : 'Progresso' }}</span>
-					<span class="text-blue-100 text-sm">{{ currentStep > totalSteps ? '✓ Concluída' : `${currentStep} de ${totalSteps}` }}</span>
+					<span class="text-blue-100 text-sm">{{ currentStep > totalSteps ? 'Formulário enviado' : 'Progresso' }}</span>
+					<span class="text-blue-100 text-sm">{{ currentStep > totalSteps ? '✓ Concluído' : `${currentStep} de ${totalSteps}` }}</span>
 				</div>
 				<div class="progress-bar"><div class="progress-fill" :style="{ width: progressPercentage + '%' }"></div></div>
 			</div>
@@ -36,8 +33,8 @@
 								<Spinner size="lg" color="white" />
 							</div>
 							<div class="space-y-3 text-center max-w-xl mx-auto">
-								<h2 class="text-3xl font-bold">Estamos preparando sua avaliação</h2>
-								<p class="text-blue-100 text-base">Estamos confirmando suas credenciais e carregando o questionário personalizado para você. Isso costuma levar apenas alguns segundos.</p>
+								<h2 class="text-3xl font-bold">Estamos preparando seu formulário</h2>
+								<p class="text-blue-100 text-base">Estamos confirmando suas credenciais e carregando o formulário de disponibilidade para você. Isso costuma levar apenas alguns segundos.</p>
 							</div>
 						</div>
 					</div>
@@ -46,17 +43,24 @@
 					<template v-if="tokenState.status === 'ready' && tokenState.data && tokenState.data.tokenStatus !== 'valid'">
 						<div class="py-10 px-6 text-white">
 							<div class="flex flex-col items-center gap-5 max-w-xl mx-auto">
-								<div class="w-16 h-16 rounded-full bg-red-500/15 flex items-center justify-center text-red-200">
+								<!-- Different icons for different states -->
+								<div v-if="isTokenUsed" class="w-16 h-16 rounded-full bg-green-500/15 flex items-center justify-center text-green-200">
+									<svg class="w-9 h-9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+										<path d="M20 6 9 17l-5-5"/>
+									</svg>
+								</div>
+								<div v-else class="w-16 h-16 rounded-full bg-red-500/15 flex items-center justify-center text-red-200">
 									<svg class="w-9 h-9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
 										<path d="M12 8v4" />
 										<path d="M12 16h.01" />
 										<path d="M10.29 3.86L1.82 18a1 1 0 00.86 1.5h18.64a1 1 0 00.86-1.5L12.71 3.86a1 1 0 00-1.72 0z" />
 									</svg>
 								</div>
-								<div class="space-y-3 text-center">
-									<h2 class="text-2xl font-bold text-white">{{ isTokenUsed ? 'Pesquisa já respondida' : 'Link inválido' }}</h2>
+								<div class="space-y-4 text-center">
+									<h2 class="text-2xl font-bold text-white">{{ isTokenUsed ? 'Disponibilidade já registrada!' : 'Link inválido' }}</h2>
 									<p class="text-base text-blue-100">{{ tokenErrorMessage }}</p>
-									<p v-if="!isTokenUsed" class="text-sm text-blue-200">Se precisar, solicite um novo link ao suporte da autoescola.</p>
+									<p v-if="!isTokenUsed" class="text-sm text-blue-100">Se precisar, solicite um novo link ao suporte da autoescola.</p>
+									<p v-else class="text-sm text-blue-100">Sua disponibilidade foi registrada anteriormente. A autoescola já tem suas informações e entrará em contato para agendar suas aulas.</p>
 								</div>
 							</div>
 						</div>
@@ -81,14 +85,14 @@
 					<template v-else>
 						<div class="text-6xl mb-6">🎯</div>
 						<h2 class="text-3xl font-bold text-gray-800 mb-4">{{ welcomeTitle }}</h2>
-						<p class="text-gray-600 text-lg mb-6 leading-relaxed">Vamos começar nossa pesquisa de satisfação. Suas respostas nos ajudam a melhorar nossos serviços continuamente.</p>
+						<p class="text-gray-600 text-lg mb-6 leading-relaxed">Vamos começar o preenchimento da sua disponibilidade. Suas respostas nos ajudam a organizar melhor os horários das aulas práticas.</p>
 						<p class="text-sm text-red-500 mb-8">* Indica uma pergunta obrigatória</p>
 					</template>
 				</div>
 					<!-- Button availability depends on token validation -->
 				<div v-if="tokenState.status !== 'loading'" class="mt-6">
 						<!-- only show start button when token is valid (or idle for local dev) -->
-						<button v-if="isTokenValidForStart" @click="nextStep" class="btn-primary">Começar Pesquisa</button>
+						<button v-if="isTokenValidForStart" @click="nextStep" class="btn-primary">Começar Preenchimento</button>
 					</div>
 				</div>
 
@@ -123,7 +127,9 @@
 													<LikertScale :model-value="formData[currentQuestion.key]" @update:model-value="setAnswer($event)" />
 												</div>
 
-						<MultipleChoice v-else-if="currentQuestion.type === 'multiple'" :model-value="formData[currentQuestion.key]" :options="currentQuestion.options" @update:model-value="setAnswer($event)" />
+						<RadioChoice v-else-if="currentQuestion.type === 'radio'" :model-value="formData[currentQuestion.key]" :options="currentQuestion.options" @update:model-value="setAnswer($event)" />
+
+						<MultipleChoice v-else-if="currentQuestion.type === 'multiple'" :model-value="formData[currentQuestion.key]" :options="currentQuestion.options" :question-key="currentQuestion.key" @update:model-value="setAnswer($event)" />
 
 						<div v-else-if="currentQuestion.type === 'text'">
 							<textarea :value="formData[currentQuestion.key]" @input="setAnswer($event.target.value)" class="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition-all duration-300 resize-none text-gray-800" rows="6" :placeholder="currentQuestion.placeholder || 'Escreva sua resposta aqui...'"></textarea>
@@ -151,10 +157,10 @@
 			<div v-if="currentStep > questions.length && !isSubmitting" class="card text-center animate-slide-in-right mb-5">
 				<div class="text-6xl mb-6">🎉</div>
 				<h2 class="text-3xl font-bold text-gray-800 mb-4">{{ thankYouTitle }}</h2>
-				<p class="text-gray-600 text-lg mb-8 leading-relaxed">Sua pesquisa foi enviada com sucesso. Suas respostas são muito importantes para nós!</p>
+				<p class="text-gray-600 text-lg mb-8 leading-relaxed">Sua disponibilidade foi enviada com sucesso. Agora conseguiremos organizar melhor os horários das aulas práticas!</p>
 			</div>
 
-			<div v-if="isSubmitting" class="card text-center mb-5"><div class="animate-spin w-16 h-16 border-4 border-green-500 border-t-transparent rounded-full mx-auto mb-6"></div><h2 class="text-2xl font-bold text-gray-800 mb-4">Enviando...</h2><p class="text-gray-600">Aguarde enquanto enviamos sua pesquisa.</p></div>
+			<div v-if="isSubmitting" class="card text-center mb-5"><div class="animate-spin w-16 h-16 border-4 border-green-500 border-t-transparent rounded-full mx-auto mb-6"></div><h2 class="text-2xl font-bold text-gray-800 mb-4">Enviando...</h2><p class="text-gray-600">Aguarde enquanto enviamos sua disponibilidade.</p></div>
 
 			<div v-if="submitError" class="card text-center mb-5"><div class="text-6xl mb-6">❌</div><h2 class="text-3xl font-bold text-red-600 mb-4">Erro ao Enviar</h2><p class="text-gray-600 text-lg mb-8">{{ submitError }}</p><button @click="retrySubmit" class="btn-primary mr-4">Tentar Novamente</button><button @click="resetSurvey" class="btn-secondary">Recomeçar</button></div>
 
@@ -170,16 +176,17 @@
 import { ref, reactive, computed, watch, nextTick, onMounted } from 'vue'
 import LikertScale from './LikertScale.vue'
 import MultipleChoice from './MultipleChoice.vue'
+import RadioChoice from './RadioChoice.vue'
 import NAButton from './NAButton.vue'
 import Spinner from './Spinner.vue'
 import Alert from './Alert.vue'
-import { submitToN8n, config, validateTokenWithBackend } from '../config/n8n.js'
-import { loadQuestions, getInitialFormData, getInitialNAFlags, getQuestionTypeLabel, validateQuestion as validateQuestionHelper, shouldShowQuestion } from '../config/questionsHelper.js'
+import { submitToN8n, config, validateTokenWithBackend, fetchInstructors } from '../config/n8n.js'
+import { loadQuestions, getInitialFormData, getInitialNAFlags, getQuestionTypeLabel, validateQuestion as validateQuestionHelper, shouldShowQuestion, filterInstructorsByCategory } from '../config/questionsHelper.js'
 import logoSvg from '../assets/logo.svg'
 
 export default {
-	name: 'NPSSurvey',
-		components: { LikertScale, MultipleChoice, NAButton, Spinner, Alert },
+	name: 'AvailabilityForm',
+		components: { LikertScale, MultipleChoice, RadioChoice, NAButton, Spinner, Alert },
 	setup() {
 		const currentStep = ref(0)
 		// token state for validation flow
@@ -188,13 +195,41 @@ export default {
 		const submitError = ref('')
 		const stepError = ref('')
 
+		// Instructors state
+		const instructorsState = reactive({ 
+			status: 'idle', // 'idle', 'loading', 'loaded', 'error'
+			data: [], 
+			error: '' 
+		})
+
 		// Load questions from JSON configuration
 		const questionsConfig = loadQuestions()
 		const allQuestions = questionsConfig.questions
 		
-		// Filter questions based on student category
+		// Filter questions based on student category and form responses
 		const questions = computed(() => {
-			return allQuestions.filter(q => shouldShowQuestion(q, tokenState.data))
+			// Process questions and replace dynamic instructor options
+			return allQuestions.filter(q => shouldShowQuestion(q, tokenState.data, formData)).map(question => {
+				// Se a pergunta tem opções de instrutores dinâmicas
+				if (question.key === 'instrutor_preferencia_carro' || question.key === 'instrutor_preferencia_moto') {
+					// Carro = categoria B, Moto = categoria A
+					const category = question.key.includes('carro') ? 'B' : 'A'
+					const instructorOptions = filterInstructorsByCategory(instructorsState.data, category)
+					
+					// Se ainda não carregou instrutores, retorna pergunta original
+					if (instructorsState.status !== 'loaded' || instructorOptions.length === 0) {
+						return question
+					}
+					
+					// Substitui as opções por instrutores dinâmicos e garante que seja tipo radio
+					return {
+						...question,
+						type: 'radio', // Garantir que seja seleção única
+						options: [...instructorOptions, 'Não tenho preferência']
+					}
+				}
+				return question
+			})
 		})
 		
 		// Initialize form data dynamically from questions
@@ -213,7 +248,7 @@ export default {
 		const progressPercentage = computed(() => Math.round((currentStep.value / (totalSteps.value + 1)) * 100))
 
 		const extractTokenFromUrl = () => {
-			const fallbackToken = (import.meta.env.NPS_DEFAULT_TOKEN || '').trim() || null
+			const fallbackToken = (import.meta.env.DEFAULT_TOKEN || '').trim() || null
 			if (typeof window === 'undefined') return fallbackToken
 			const currentUrl = new URL(window.location.href)
 			const queryToken = currentUrl.searchParams.get('token')
@@ -297,8 +332,30 @@ export default {
 				console.error('Error clearing progress from localStorage:', error)
 			}
 		}
+		
+		// Load instructors function
+		const loadInstructors = async () => {
+			instructorsState.status = 'loading'
+			try {
+				const result = await fetchInstructors()
+				if (result.success) {
+					instructorsState.data = result.instructors || []
+					instructorsState.status = 'loaded'
+				} else {
+					instructorsState.status = 'error'
+					instructorsState.error = result.error || 'Erro ao carregar instrutores'
+				}
+			} catch (error) {
+				instructorsState.status = 'error'
+				instructorsState.error = error.message || 'Erro ao carregar instrutores'
+				console.error('Error loading instructors:', error)
+			}
+		}
 
 	onMounted(async () => {
+		// Load instructors in parallel with token validation
+		loadInstructors()
+		
 		const token = extractTokenFromUrl()
 		const isProduction = import.meta.env.PROD
 		
@@ -356,12 +413,12 @@ export default {
 							hour: '2-digit',
 							minute: '2-digit'
 						})
-						return `Essa pesquisa já foi respondida em ${formattedDate}`
+						return `Esse formulário já foi preenchido em ${formattedDate}`
 					} catch (e) {
-						return 'Essa pesquisa já foi respondida anteriormente'
+						return 'Esse formulário já foi preenchido anteriormente'
 					}
 				}
-				return 'Essa pesquisa já foi respondida anteriormente'
+				return 'Esse formulário já foi preenchido anteriormente'
 			}
 			return tokenState.error || 'Token inativo'
 		})
@@ -480,29 +537,44 @@ export default {
 		const submitSurvey = async () => {
 			isSubmitting.value = true; submitError.value = ''
 			try {
-								const surveyData = {
-									nps_score: formData.npsScore,
-									overall_satisfaction: formData.overallSatisfaction,
-									reception_service: formData.receptionService,
-									theory_classes: formData.theoryClasses,
-									practical_car_classes: formData.practicalCarClasses,
-									practical_moto_classes: formData.practicalMotoClasses,
-									practical_instructor_car: formData.practicalInstructorCar,
-									practical_instructor_moto: formData.practicalInstructorMoto,
-									vehicle_conditions: formData.vehicleConditions,
-									infrastructure: formData.infrastructure,
-									dislikes: formData.dislikes,
-									likes: formData.likes,
-									comments: formData.comments
-								}
+				// Create availability data object from formData
+				const availabilityData = {
+					// Basic availability settings
+					availableAnytime: formData.availableAnytime || null,
+					
+					// Weekly availability schedules
+					mondayAvailability: formData.mondayAvailability || [],
+					tuesdayAvailability: formData.tuesdayAvailability || [],
+					wednesdayAvailability: formData.wednesdayAvailability || [],
+					thursdayAvailability: formData.thursdayAvailability || [],
+					fridayAvailability: formData.fridayAvailability || [],
+					saturdayAvailability: formData.saturdayAvailability || [],
+					
+					// Knowledge levels
+					knowledgeCar: formData.knowledgeCar || null,
+					knowledgeMoto: formData.knowledgeMoto || null,
+					
+					// Instructor preferences
+					instrutor_preferencia_carro: formData.instrutor_preferencia_carro || null,
+					instrutor_preferencia_moto: formData.instrutor_preferencia_moto || null,
+					
+					// Comments
+					comments: formData.comments || '',
+					
+					// Student category from token data
+					studentCategory: tokenState.data?.studentCategory || null
+				}
+				
+				console.log('Submitting availability data:', availabilityData)
+				
 				// Pass the token as second parameter to submitToN8n
-				const result = await submitToN8n(surveyData, tokenState.token)
+				const result = await submitToN8n(availabilityData, tokenState.token)
 				if (result.success) {
 					currentStep.value++
 					// Clear saved progress after successful submission
 					clearProgress()
 				}
-				else submitError.value = result.error || 'Erro desconhecido ao enviar a pesquisa.'
+				else submitError.value = result.error || 'Erro desconhecido ao enviar o formulário.'
 			} catch (error) { console.error('Submit error:', error); submitError.value = 'Erro de conexão. Verifique sua internet e tente novamente.' }
 			finally { isSubmitting.value = false }
 		}
@@ -517,7 +589,17 @@ export default {
 					clearProgress()
 				}
 
-				return { currentStep, questions, totalSteps, currentQuestion, progressPercentage, formData, isSubmitting, submitError, stepError, config, getQuestionType, setAnswer, onNAChange, naFlags, toggleNA, nextStep, previousStep, submitSurvey, retrySubmit, resetSurvey, logoSvg, tokenState, welcomeTitle, thankYouTitle, isTokenValidForStart, hasValidToken, isTokenUsed, tokenErrorMessage }
+				const goBack = () => {
+					// Simple navigation back - can be enhanced with actual routing if needed
+					if (window.history.length > 1) {
+						window.history.back()
+					} else {
+						// Fallback: redirect to a home page or close window
+						window.close()
+					}
+				}
+
+				return { currentStep, questions, totalSteps, currentQuestion, progressPercentage, formData, isSubmitting, submitError, stepError, config, getQuestionType, setAnswer, onNAChange, naFlags, toggleNA, nextStep, previousStep, submitSurvey, retrySubmit, resetSurvey, logoSvg, tokenState, welcomeTitle, thankYouTitle, isTokenValidForStart, hasValidToken, isTokenUsed, tokenErrorMessage, goBack }
 	}
 }
 </script>
