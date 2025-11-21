@@ -184,17 +184,20 @@ export const getQuestionsByCategory = (category) => {
  */
 /**
  * Filter instructors by category
- * @param {Array} instructors - Array of instructor objects with 'instrutor' and 'categoria' properties
+ * @param {Array} instructors - Array of instructor objects with 'idInstrutor', 'instrutor' and 'categoria' properties
  * @param {string} category - Category to filter by ('A' or 'B')
- * @returns {Array} Filtered array of instructor names
+ * @returns {Array} Filtered array of instructor objects with id and name
  */
 export const filterInstructorsByCategory = (instructors, category) => {
   if (!Array.isArray(instructors) || !category) return []
   
   return instructors
     .filter(inst => inst.categoria === category)
-    .map(inst => inst.instrutor)
-    .sort() // Alphabetical order
+    .map(inst => ({
+      id: inst.idInstrutor,
+      name: inst.instrutor
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name)) // Alphabetical order by name
 }
 
 /**

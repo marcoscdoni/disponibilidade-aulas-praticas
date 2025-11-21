@@ -39,8 +39,8 @@ export const submitToN8n = async (availabilityData, token = null) => {
       autoescola: config.autoescola.name,
       token: token || null,
       
-      // Availability settings
-      available_anytime: availabilityData.availableAnytime || null,
+      // Availability settings (convert "Sim"/"Não" to 1/0 for SQL Server)
+      available_anytime: availabilityData.availableAnytime === 'Sim' ? 1 : (availabilityData.availableAnytime === 'Não' ? 0 : null),
       
       // Weekly availability schedules
       monday_availability: Array.isArray(availabilityData.mondayAvailability) ? availabilityData.mondayAvailability : [],
@@ -57,6 +57,9 @@ export const submitToN8n = async (availabilityData, token = null) => {
       // Instructor preferences
       preferred_instructor_car: availabilityData.instrutor_preferencia_carro || null,
       preferred_instructor_moto: availabilityData.instrutor_preferencia_moto || null,
+      
+      // Balance/coordination for motorcycles (convert "Sim"/"Não" to 1/0 for SQL Server)
+      has_balance: availabilityData.hasBalance === 'Sim' ? 1 : (availabilityData.hasBalance === 'Não' ? 0 : null),
       
       // Additional comments
       comments: availabilityData.comments || '',
@@ -85,17 +88,39 @@ export const submitToN8n = async (availabilityData, token = null) => {
       throw new Error(`HTTP error! status: ${response.status}`)
     }
 
-    // Try to parse JSON, but some webhooks may respond with empty body
-    let result = null
-    try {
-      result = await response.json()
-    } catch (err) {
-      // ignore parse errors
-      result = null
+    // Parse the webhook response
+    const result = await response.json()
+    console.log('N8N webhook response:', result)
+
+    // Check if the webhook returned success/failure
+    if (result && typeof result.success === 'boolean') {
+      if (result.success) {
+        return { 
+          success: true, 
+          message: result.message || 'Availability saved successfully',
+          data: result 
+        }
+      } else {
+        return { 
+          success: false, 
+          error: result.message || 'Failed to save availability data'
+        }
+      }
     }
 
-    console.log('backend response:', result)
+    // If no success field, check for old format or assume success
+    if (result && result.Sucesso !== undefined) {
+      // Old stored procedure format
+      const isSuccess = result.Sucesso === true || result.Sucesso === 1
+      return {
+        success: isSuccess,
+        error: isSuccess ? null : (result.Mensagem || 'Unknown error'),
+        data: result
+      }
+    }
 
+    // If response has no clear success indicator, assume success
+    // (for backwards compatibility with old webhooks)
     return { success: true, data: result }
   } catch (error) {
     console.error('Error submitting availability data to n8n:', error)

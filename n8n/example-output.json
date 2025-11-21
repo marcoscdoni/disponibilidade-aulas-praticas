@@ -1,0 +1,19 @@
+{
+  "IdProcesso": 1085,
+  "InstrututorAuto": 49,
+  "InstrutorMoto": 26,
+  "NivelHabilidadeAuto": 3,
+  "NivelHabilidadeMoto": 1,
+  "PossuiEquilibrio": "S",
+  "Observacoes": null,
+  "DisponibilidadeJson": "[{\"dia\":2,\"inicio\":\"07:00:00\",\"fim\":\"21:20:00\"},{\"dia\":3,\"inicio\":\"07:00:00\",\"fim\":\"21:20:00\"},{\"dia\":4,\"inicio\":\"07:00:00\",\"fim\":\"08:40:00\"},{\"dia\":5,\"inicio\":\"12:00:00\",\"fim\":\"12:50:00\"},{\"dia\":6,\"inicio\":\"07:00:00\",\"fim\":\"08:40:00\"}]",
+  "DisponibilidadeQualquerHorario": false,
+  "_metadata": {
+    "timestamp": "2025-11-21T02:44:00.844Z",
+    "autoescola": "AutoEscola Modelo",
+    "token": "2189D095-EFC9-4C73-80BC-4E712AD738AF",
+    "ip_acesso": "::1",
+    "name": "MARCOS CESAR DONI",
+    "category": "AB"
+  }
+}

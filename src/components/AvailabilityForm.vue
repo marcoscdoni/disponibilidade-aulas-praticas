@@ -1,5 +1,21 @@
 <template>
 	<div class="min-h-screen bg-gradient-to-br relative">
+		<!-- Loading Overlay Modal (aparece por cima de tudo) -->
+		<div v-if="isSubmitting" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
+			<div class="bg-white rounded-2xl p-8 mx-4 max-w-sm w-full text-center shadow-2xl animate-scale-in">
+				<div class="animate-spin w-16 h-16 border-4 border-green-500 border-t-transparent rounded-full mx-auto mb-6"></div>
+				<h2 class="text-2xl font-bold text-gray-800 mb-4">Processando...</h2>
+				<p class="text-gray-600">Aguarde enquanto salvamos sua disponibilidade no sistema.</p>
+				<div class="mt-6 flex justify-center">
+					<div class="flex space-x-1">
+						<div class="w-2 h-2 bg-green-500 rounded-full animate-bounce"></div>
+						<div class="w-2 h-2 bg-green-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+						<div class="w-2 h-2 bg-green-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+
 	<div class="container mx-auto px-4 py-8 max-w-2xl pb-20">
 			<!-- Header with conditional content -->
 	    <div class="text-center mb-8 animate-fade-in py-6 -mx-4 px-4">
@@ -40,7 +56,7 @@
 					</div>
 				<!-- Default welcome content once token é válido -->
 				<div v-else>
-					<template v-if="tokenState.status === 'ready' && tokenState.data && tokenState.data.tokenStatus !== 'valid'">
+					<template v-if="tokenState.status === 'ready' && tokenState.data && (tokenState.data.tokenStatus !== 'valid' || isTokenUsed)">
 						<div class="py-10 px-6 text-white">
 							<div class="flex flex-col items-center gap-5 max-w-xl mx-auto">
 								<!-- Different icons for different states -->
@@ -153,14 +169,12 @@
 				</div>
 			</transition>
 
-			<!-- Thank you / loading / error screens -->
+			<!-- Thank you / error screens -->
 			<div v-if="currentStep > questions.length && !isSubmitting" class="card text-center animate-slide-in-right mb-5">
 				<div class="text-6xl mb-6">🎉</div>
 				<h2 class="text-3xl font-bold text-gray-800 mb-4">{{ thankYouTitle }}</h2>
 				<p class="text-gray-600 text-lg mb-8 leading-relaxed">Sua disponibilidade foi enviada com sucesso. Agora conseguiremos organizar melhor os horários das aulas práticas!</p>
 			</div>
-
-			<div v-if="isSubmitting" class="card text-center mb-5"><div class="animate-spin w-16 h-16 border-4 border-green-500 border-t-transparent rounded-full mx-auto mb-6"></div><h2 class="text-2xl font-bold text-gray-800 mb-4">Enviando...</h2><p class="text-gray-600">Aguarde enquanto enviamos sua disponibilidade.</p></div>
 
 			<div v-if="submitError" class="card text-center mb-5"><div class="text-6xl mb-6">❌</div><h2 class="text-3xl font-bold text-red-600 mb-4">Erro ao Enviar</h2><p class="text-gray-600 text-lg mb-8">{{ submitError }}</p><button @click="retrySubmit" class="btn-primary mr-4">Tentar Novamente</button><button @click="resetSurvey" class="btn-secondary">Recomeçar</button></div>
 
@@ -214,18 +228,13 @@ export default {
 				if (question.key === 'instrutor_preferencia_carro' || question.key === 'instrutor_preferencia_moto') {
 					// Carro = categoria B, Moto = categoria A
 					const category = question.key.includes('carro') ? 'B' : 'A'
-					const instructorOptions = filterInstructorsByCategory(instructorsState.data, category)
-					
-					// Se ainda não carregou instrutores, retorna pergunta original
-					if (instructorsState.status !== 'loaded' || instructorOptions.length === 0) {
-						return question
-					}
+					const instructorOptions = getInstructorOptions(category)
 					
 					// Substitui as opções por instrutores dinâmicos e garante que seja tipo radio
 					return {
 						...question,
 						type: 'radio', // Garantir que seja seleção única
-						options: [...instructorOptions, 'Não tenho preferência']
+						options: instructorOptions // Now contains {value: ID, label: name} objects
 					}
 				}
 				return question
@@ -439,7 +448,9 @@ export default {
 
 		const hasValidToken = computed(() => {
 			if (tokenState.status !== 'ready' || !tokenState.data) return false
-			return String(tokenState.data.tokenStatus || '').toLowerCase() === 'valid'
+			const isTokenValid = String(tokenState.data.tokenStatus || '').toLowerCase() === 'valid'
+			const isNotUsed = !isTokenUsed.value
+			return isTokenValid && isNotUsed
 		})
 
 		const isTokenValidForStart = computed(() => hasValidToken.value)
@@ -534,6 +545,24 @@ export default {
 
 		const previousStep = () => { if (currentStep.value > 1) { currentStep.value--; stepError.value = ''; scrollToCard() } }
 
+		// Helper function to get instructor options for a specific category
+		const getInstructorOptions = (category) => {
+			if (instructorsState.status !== 'loaded' || !instructorsState.data) {
+				return [{ value: '', label: 'Carregando instrutores...' }]
+			}
+			
+			const instructorObjects = filterInstructorsByCategory(instructorsState.data, category)
+			const options = [
+				{ value: '', label: 'Não tenho preferência' },
+				...instructorObjects.map(inst => ({
+					value: inst.id.toString(), // Store ID as value
+					label: inst.name         // Display name as label
+				}))
+			]
+			
+			return options
+		}
+
 		const submitSurvey = async () => {
 			isSubmitting.value = true; submitError.value = ''
 			try {
@@ -554,12 +583,15 @@ export default {
 					knowledgeCar: formData.knowledgeCar || null,
 					knowledgeMoto: formData.knowledgeMoto || null,
 					
-					// Instructor preferences
+					// Instructor preferences (now directly IDs)
 					instrutor_preferencia_carro: formData.instrutor_preferencia_carro || null,
 					instrutor_preferencia_moto: formData.instrutor_preferencia_moto || null,
 					
+					// Balance/coordination for motorcycles
+					hasBalance: formData.hasBalance || null,
+					
 					// Comments
-					comments: formData.comments || '',
+					comments: formData.additionalScheduleInfo || '',
 					
 					// Student category from token data
 					studentCategory: tokenState.data?.studentCategory || null
@@ -569,14 +601,26 @@ export default {
 				
 				// Pass the token as second parameter to submitToN8n
 				const result = await submitToN8n(availabilityData, tokenState.token)
+				
+				// Check webhook response for success/failure
 				if (result.success) {
+					console.log('Availability successfully saved:', result.message)
 					currentStep.value++
 					// Clear saved progress after successful submission
 					clearProgress()
+				} else {
+					// Display specific error message from webhook
+					const errorMessage = result.error || result.message || 'Erro desconhecido ao enviar o formulário.'
+					submitError.value = errorMessage
+					console.error('Submission failed:', errorMessage)
 				}
-				else submitError.value = result.error || 'Erro desconhecido ao enviar o formulário.'
-			} catch (error) { console.error('Submit error:', error); submitError.value = 'Erro de conexão. Verifique sua internet e tente novamente.' }
-			finally { isSubmitting.value = false }
+			} catch (error) { 
+				console.error('Submit error:', error)
+				submitError.value = 'Erro de conexão. Verifique sua internet e tente novamente.' 
+			}
+			finally { 
+				isSubmitting.value = false 
+			}
 		}
 
 				const retrySubmit = () => { submitError.value = ''; currentStep.value = questions.value.length }
@@ -618,5 +662,50 @@ textarea.text-gray-800 {
 button:disabled {
 	opacity: 0.6;
 	cursor: not-allowed;
+}
+
+/* Loading Modal Animations */
+@keyframes scale-in {
+	0% { 
+		transform: scale(0.9); 
+		opacity: 0; 
+	}
+	100% { 
+		transform: scale(1); 
+		opacity: 1; 
+	}
+}
+
+.animate-scale-in {
+	animation: scale-in 0.3s ease-out;
+}
+
+/* Bounce animation for dots */
+@keyframes bounce {
+	0%, 80%, 100% {
+		transform: translateY(0);
+	}
+	40% {
+		transform: translateY(-8px);
+	}
+}
+
+.animate-bounce {
+	animation: bounce 1.4s infinite;
+}
+
+/* Backdrop blur support for older browsers */
+.backdrop-blur-sm {
+	backdrop-filter: blur(4px);
+	-webkit-backdrop-filter: blur(4px);
+}
+
+/* Fixed positioning enhancements for mobile */
+.fixed.inset-0 {
+	position: fixed;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
 }
 </style>

@@ -13,8 +13,8 @@
   "questions": [
     {
       "key": "availableAnytime",
-      "question": "Você pode fazer aula em qualquer horário entre 07h00 até 18h50?",
-      "description": "Lembre-se que quanto mais horários você tiver, mais rápido será o término das aulas. Porém, só informe horários que realmente poderá fazer as aulas.",
+      "question": "Você pode fazer aula em qualquer horário entre 07h00 até 21h20?",
+      "description": "Mais horários = aulas mais rápidas. Só marque horários que realmente consegue. Se tem restrições, marque 'Não'.",
       "type": "radio",
       "options": ["Sim", "Não"],
       "required": true,
@@ -198,7 +198,7 @@
       "key": "instrutor_preferencia_carro",
       "question": "Qual instrutor você prefere para carro?   👨‍🏫  🚗",
       "type": "radio",
-      "description": "Selecione o instrutor de sua preferência para as aulas de carro.",
+      "description": "Escolher um instrutor específico pode aumentar o tempo de espera devido à disponibilidade. Marcar \"Não tenho preferência\" acelera o início das aulas.",
       "required": false,
       "order": 9,
       "category": "car",
@@ -207,12 +207,24 @@
       "options": ["Carregando instrutores..."]
     },
     {
+      "key": "hasBalance",
+      "question": "Você sabe andar de bicicleta? 🚴‍♂️",
+      "type": "radio",
+      "description": "Esta informação nos ajuda a entender seu nível de equilíbrio e coordenação para as aulas de moto.",
+      "required": true,
+      "order": 10,
+      "category": "moto",
+      "conditional": true,
+      "showIf": { "studentCategory": ["A", "AB"] },
+      "options": ["Sim", "Não"]
+    },
+    {
       "key": "knowledgeMoto",
       "question": "Qual seu nível de conhecimento em relação a MOTO?    🏍️ 🏍️ 🏍️",
       "type": "radio",
       "options": ["Nunca dirigi", "Noção Básica", "Já tenho experiência"],
       "required": true,
-      "order": 10,
+      "order": 11,
       "category": "moto",
       "conditional": true,
       "showIf": { "studentCategory": ["A", "AB"] }
@@ -221,9 +233,9 @@
       "key": "instrutor_preferencia_moto",
       "question": "Qual instrutor para moto?  👨‍🏫   🏍️",
       "type": "radio",
-      "description": "Selecione o instrutor de sua preferência para as aulas de moto.",
+      "description": "Escolher um instrutor específico pode aumentar o tempo de espera devido à disponibilidade. Marcar \"Não tenho preferência\" acelera o início das aulas.",
       "required": false,
-      "order": 11,
+      "order": 12,
       "category": "moto",
       "conditional": true,
       "showIf": { "studentCategory": ["A", "AB"] },
@@ -234,7 +246,7 @@
       "question": "Deseja colocar informações adicionais sobre seus horários?",
       "type": "text",
       "required": false,
-      "order": 12,
+      "order": 13,
       "placeholder": "Ex.: só posso após as 18h às terças e quintas"
     }
   ]
