@@ -1,0 +1,25 @@
+# Adicione este bloco ao seu docker-compose.yml
+
+  disponibilidade-aulas:
+    build:
+      context: ./disponibilidade-aulas-praticas
+      dockerfile: Dockerfile
+    container_name: disponibilidade-aulas
+    restart: always
+    env_file:
+      - ./disponibilidade-aulas-praticas/.env
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - TZ=America/Sao_Paulo
+    networks:
+      - infra_default
+    expose:
+      - "3000"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.disponibilidade-aulas.rule=Host(`disponibilidade.vempramodelo.com`)"
+      - "traefik.http.routers.disponibilidade-aulas.entrypoints=websecure"
+      - "traefik.http.routers.disponibilidade-aulas.tls.certresolver=letsencrypt"
+      - "traefik.http.services.disponibilidade-aulas.loadbalancer.server.port=3000"
+      - "traefik.docker.network=infra_default"
